@@ -144,9 +144,10 @@ class ReleaseBuilder
             throw new UpdateException('vendor/ lipsește — rulați „composer install --no-dev --optimize-autoloader” înainte.');
         }
         $files = $this->collect(array_merge(self::APP_PATHS, self::INSTALL_EXTRA, ['vendor']));
-        // Fără date locale: nici .env, nici loguri, nici upload-uri.
-        $files = array_filter($files, fn ($rel) => ! preg_match('~^storage/(logs|framework/(cache|sessions|views)|app/(public|private))/.+~', $rel)
-            || str_ends_with($rel, '.gitignore'), ARRAY_FILTER_USE_KEY);
+        // Fără date locale: nici .env, nici loguri, sesiuni, cache, upload-uri, backup-uri.
+        $files = array_filter($files, fn ($rel) => $rel !== '.env'
+            && (! preg_match('~^storage/(logs|framework/(cache|sessions|views|testing)|app/(public|private))/.+~', $rel)
+                || preg_match('~/(\.gitignore|\.htaccess)$~', $rel)), ARRAY_FILTER_USE_KEY);
 
         $hashes = [];
         foreach ($files as $rel => $abs) {
@@ -199,7 +200,7 @@ class ReleaseBuilder
                 $out[$p] = $abs;
             } elseif (is_dir($abs)) {
                 $finder = (new Finder)->files()->in($abs)->ignoreDotFiles(false)->ignoreVCS(true)
-                    ->exclude(['node_modules'])
+                    ->exclude(['node_modules', 'releases'])
                     ->notName(['.DS_Store', 'Thumbs.db', '*.log', '.phpunit.result.cache']);
                 foreach ($finder as $f) {
                     if ($f->isLink()) {
