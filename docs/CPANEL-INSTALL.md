@@ -12,7 +12,7 @@
 
 ## 1. Upload
 
-1. Primiți pachetul `autentikmarket-install-1.0.0.zip` (generat cu `tools/build-release.sh 1.0.0 --install`; conține deja `vendor/` și `public/build/`).
+1. Primiți pachetul `autentikmarket-install-X.Y.Z.zip` (ultima versiune, generat cu `tools/build-release.sh X.Y.Z --install`; conține deja `vendor/` și `public/build/`). Instalați direct ultima versiune: nu e nevoie să instalați 1.0.0 și apoi update-urile.
 2. cPanel → **File Manager** → în directorul home (ex. `/home/USER/`), **nu** în `public_html`: Upload → Extract. Rezultă `/home/USER/autentikmarket/`.
 
 ## 2. Document root
@@ -71,11 +71,28 @@ Fără Terminal: generați local cheia cu `php artisan key:generate --show` și 
 
 ```bash
 php artisan migrate --force
-php artisan db:seed --force              # locațiile inițiale (Târgu Mureș, Reghin) cu layout DEMO
+php artisan db:seed --force              # locațiile Târgu Mureș și Reghin cu hărțile oficiale
 php artisan app:create-super-admin       # contul SUPER ADMIN (interactiv)
 ```
 
 Rolurile, permisiunile și template-urile RO/HU sunt inserate automat de migrații.
+
+Contul super admin se poate crea și fără întrebări interactive:
+
+```bash
+php artisan app:create-super-admin --email=adresa@domeniu.ro --first-name=Prenume --last-name=Nume --password='ParolaPuternica!2026' -n
+```
+
+### Fără Terminal (SSH)
+
+Dacă pachetul de hosting nu are Terminal, comenzile de la pașii 6–8 se rulează **o singură dată** prin Cron Jobs:
+
+1. Adăugați un cron *Once Per Minute* cu comanda (pe un singur rând):
+   ```bash
+   cd /home/USER/autentikmarket && /usr/local/bin/php artisan key:generate --force && /usr/local/bin/php artisan migrate --force && /usr/local/bin/php artisan db:seed --force && /usr/local/bin/php artisan storage:link >> /home/USER/install.log 2>&1
+   ```
+2. Așteptați 1–2 minute, verificați `install.log` în File Manager și **ștergeți imediat cronul**.
+3. La fel, un cron temporar pentru `app:create-super-admin ... -n`. Ștergeți-l după primul minut: conține parola.
 
 ## 8. Storage
 
@@ -118,6 +135,8 @@ După orice modificare manuală în `.env`: `php artisan optimize:clear && php a
 
 ## 13. SSL
 
+> `.env.example` are `SESSION_SECURE_COOKIE=true`. Fără HTTPS, autentificarea nu funcționează. Activați SSL **înainte** de prima logare.
+
 - cPanel → **SSL/TLS Status** → AutoSSL (Let's Encrypt) pentru domeniu.
 - Apoi decomentați în `public/.htaccess` regula de redirect HTTPS.
 - `.env`: `SESSION_SECURE_COOKIE=true`.
@@ -127,10 +146,10 @@ După orice modificare manuală în `.env`: `php artisan optimize:clear && php a
 - [ ] `https://autentikmarket.ro` redirecționează spre `/ro` (sau `/hu` pentru browsere în maghiară)
 - [ ] `/ro` și `/hu` se încarcă, iar switcher-ul RO/HU păstrează pagina
 - [ ] Autentificare Super Admin → `/crm`
-- [ ] CRM → Sistem: versiunea `1.0.0`, Debug `OFF`, ultimul cron în ultimul minut
+- [ ] CRM → Sistem: versiunea instalată (ex. `1.1.0`), Debug `OFF`, ultimul cron în ultimul minut
 - [ ] CRM → Setări: datele organizatorului, URL-ul Autentik Shop, logo
 - [ ] Trimite email test → status „Trimis”
-- [ ] CRM → Hartă & standuri: editorul se deschide
+- [ ] CRM → Hartă & standuri: hărțile Târgu Mureș (20 de standuri) și Reghin (13 standuri) sunt MASTER
 - [ ] Creați un eveniment de test → harta și checklist-ul sunt generate
 - [ ] `/staff` pe telefon: scannerul pornește camera (necesită HTTPS)
 - [ ] `/.env`, `/storage/logs/` și `/vendor/` răspund cu 403/404
