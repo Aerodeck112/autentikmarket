@@ -106,17 +106,25 @@ Seed-ul aplicației conține categorii editabile: *Miere & produse apicole; Lact
 | Date juridice organizator (firmă, CUI, adresă) | **placeholder** în Setări → Organizator și în template-ul de contract |
 | Text juridic contract / anexă | **schelet cu placeholder-e**, de completat de jurist |
 | Termeni, confidențialitate, GDPR | **schelet**, de validat juridic |
-| Schițe Târgu Mureș / Reghin | **neatașate încă**. Layout-uri demo provizorii, editabile în editorul de hartă. Digitizarea finală se face după primirea schițelor (vezi §8). |
+| Schițe Târgu Mureș / Reghin | **primite și digitizate** în versiunea 1.1.0 (vezi §8). Scara este aproximativă (stand = 3 × 3 m). |
 
 ## 8. Schițele târgurilor — status
 
-Brief-ul menționează schițe JPG/PNG/PDF pentru Târgu Mureș și Reghin. **Acestea nu au fost încă atașate.** Am pregătit:
+Organizatorul a trimis cele două schițe (A4), digitizate în versiunea 1.1.0:
 
-1. editorul de hartă din CRM: încarcă schița ca background, desenează standuri peste ea (mutare, resize, rotire, duplicare, numerotare, preț, electricitate, blocare);
-2. două layout-uri master **provizorii** (grilă generică, marcate „DEMO – înlocuiți după schiță”);
-3. procedura de digitizare (§ „Digitizare schiță” din `ARCHITECTURE.md`): calibrare la scară reală (metri), identificarea culoarelor, numerotare `TM-01…`, `RG-01…`.
+- **Târgu Mureș** — curtea/parcarea magazinului Merkur:
+  - 20 de standuri; standul 3 = INFO;
+  - repere: râul, zonele verzi, aleea pietonală, clădirea Merkur, WC.
+- **Reghin** — piața din fața Catedralei Greco-Catolice, lângă strada Aurel Vlaicu:
+  - 13 standuri; standul 2 = INFO;
+  - repere: statuia Cardinal Alexandru Todea, fântâna arteziană, zonele verzi, accesul auto posibil.
 
-Când primim schițele, le digitizăm direct în editor sau printr-un seeder dedicat.
+Ce se poate verifica sau completa ulterior:
+- scara reală: schițele nu au cotă, așa că am presupus standuri de 3 × 3 m;
+- tarifele și electricitatea pe stand;
+- adresa exactă de la Reghin. Am completat-o din schiță: „Piața Catedralei Greco-Catolice (str. Aurel Vlaicu)”.
+
+Detalii tehnice: `ARCHITECTURE.md` § 7.
 
 ## 9. Concluzii pentru produs
 

@@ -134,11 +134,11 @@
     </div>
 </footer>
 
-<div x-data="{ show: false }" x-init="try { show = !localStorage.getItem('am_cookie_ok') } catch (e) {}" x-show="show" x-cloak x-transition
+<div x-data="{ show: false, init() { try { this.show = !localStorage.getItem('am_cookie_ok') } catch (e) {} }, accept() { try { localStorage.setItem('am_cookie_ok', '1') } catch (e) {} this.show = false } }" x-show="show" x-cloak x-transition
      class="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-xl rounded-2xl border border-line bg-white p-4 text-sm shadow-[var(--shadow-lift)] sm:bottom-5">
     <p class="text-ink-soft">{{ __('Folosim doar cookie-uri strict necesare funcționării site-ului (sesiune, securitate, limbă). Nu folosim cookie-uri de urmărire.') }}
         <a href="{{ lroute('legal.cookies') }}" class="text-clay underline">{{ __('Detalii') }}</a></p>
-    <button type="button" class="btn-primary btn-sm mt-3" @click="try { localStorage.setItem('am_cookie_ok', '1') } catch (e) {}; show = false">{{ __('Am înțeles') }}</button>
+    <button type="button" class="btn-primary btn-sm mt-3" @click="accept()">{{ __('Am înțeles') }}</button>
 </div>
 </body>
 </html>

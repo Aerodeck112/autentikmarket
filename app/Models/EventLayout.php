@@ -15,6 +15,7 @@ class EventLayout extends Model
         'width_m' => 'float',
         'height_m' => 'float',
         'background_opacity' => 'float',
+        'elements' => 'array',
     ];
 
     public function event(): BelongsTo

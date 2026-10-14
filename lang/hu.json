@@ -1123,5 +1123,15 @@
     "ștergeri": "törlés",
     "Ți-am trimis un link de confirmare. Verifică și folderul Spam.": "Küldtünk egy megerősítő linket. Nézd meg a Spam mappát is.",
     "Ține-mă minte": "Emlékezz rám",
-    "— fără locație (fără hartă) —": "— helyszín nélkül (térkép nélkül) —"
+    "— fără locație (fără hartă) —": "— helyszín nélkül (térkép nélkül) —",
+    "Decor": "Díszlet",
+    "Decor hartă": "Térképdíszlet",
+    "Zonele verzi, clădirile, drumurile, etichetele și marcajele (WC, intrare) desenate sub standuri. Formatul este descris în docs/ARCHITECTURE.md; serverul validează fiecare element la salvare.": "A standok alá rajzolt zöldövezetek, épületek, utak, feliratok és jelölések (WC, bejárat). A formátum leírása a docs/ARCHITECTURE.md fájlban található; mentéskor a szerver minden elemet ellenőriz.",
+    "Aplică": "Alkalmaz",
+    "Reîncarcă": "Újratöltés",
+    "Elimină decorul": "Díszlet törlése",
+    "JSON invalid: decorul trebuie să fie o listă de elemente.": "Érvénytelen JSON: a díszletnek elemek listájának kell lennie.",
+    "Elimini tot decorul hărții (zone, clădiri, etichete)? Standurile rămân.": "Törlöd a térkép teljes díszletét (zónák, épületek, feliratok)? A standok megmaradnak.",
+    "Prea multe elemente de decor (maxim :n).": "Túl sok díszletelem (legfeljebb :n).",
+    "Element de decor invalid (#:i, :what).": "Érvénytelen díszletelem (#:i, :what)."
 }

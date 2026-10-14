@@ -36,6 +36,7 @@ class LayoutSnapshotService
                 'height_m' => $layout->height_m,
                 'background_path' => $layout->background_path,
                 'background_opacity' => $layout->background_opacity,
+                'elements' => $layout->elements,
             ]);
 
             $now = now();

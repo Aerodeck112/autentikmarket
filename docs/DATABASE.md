@@ -38,9 +38,9 @@ sessions · cache · jobs · failed_jobs · password_reset_tokens
 | `producers` | profil producător | `user_id` UNIQUE, `slug` UNIQUE, `qr_token` UNIQUE, INDEX (`status`, `preferred_language`) |
 | `producer_documents` | documente private | fișier pe discul `private`, `uuid` folosit ca cheie de rută |
 | `producer_status_history` | istoric verificare | cine, când, notă |
-| `venues` / `venue_layouts` / `layout_slots` | locații + layout master | UNIQUE (`venue_layout_id`, `code`) |
+| `venues` / `venue_layouts` / `layout_slots` | locații + layout master; `venue_layouts.elements` = decor JSON (din 1.1.0) | UNIQUE (`venue_layout_id`, `code`) |
 | `events` | târguri | `slug` UNIQUE, INDEX (`status`, `event_date`) |
-| `event_layouts` / `event_slots` | snapshot hartă per eveniment | `event_layouts.event_id` UNIQUE; UNIQUE (`event_id`, `code`) |
+| `event_layouts` / `event_slots` | snapshot hartă per eveniment (inclusiv `elements`) | `event_layouts.event_id` UNIQUE; UNIQUE (`event_id`, `code`) |
 | `event_registrations` | participarea producătorului | UNIQUE (`event_id`, `producer_id`) |
 | `stand_reservations` | hold / cerere / aprobare | **`active_slot_id` UNIQUE** (un singur rând activ per stand), **`active_producer_key` UNIQUE** (o rezervare activă per producător și eveniment) |
 | `checkins` | vizite | **UNIQUE (`event_id`, `user_id`)**, deci o vizită per eveniment |

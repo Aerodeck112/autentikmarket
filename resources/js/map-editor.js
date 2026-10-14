@@ -1,4 +1,4 @@
-import { createViewport, slotSvg, esc } from './svg-viewport';
+import { createViewport, slotSvg, esc, decorSvg } from './svg-viewport';
 
 /**
  * EDITOR HARTĂ (CRM) — SVG, totul în browser.
@@ -8,7 +8,11 @@ import { createViewport, slotSvg, esc } from './svg-viewport';
 export function mapEditor(config) {
     let tempId = -1;
     return {
-        layout: { width_m: 40, height_m: 30, background_url: null, background_opacity: 0.6, name: '' },
+        layout: { width_m: 40, height_m: 30, background_url: null, background_opacity: 0.6, name: '', elements: [] },
+        showDecor: true,
+        decorDirty: false,
+        decorJson: '',
+        decorError: null,
         slots: [],
         selectedId: null,
         snap: 0.5,
@@ -63,7 +67,7 @@ export function mapEditor(config) {
             const L = this.layout;
             const grid = `<defs><pattern id="g1" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0H0V1" fill="none" stroke="#e9ddbf" stroke-width="0.02"/></pattern>
                 <pattern id="g5" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M5 0H0V5" fill="none" stroke="#d9c79a" stroke-width="0.05"/></pattern></defs>`;
-            const base = `<rect x="0" y="0" width="${L.width_m}" height="${L.height_m}" fill="#fffdf7"/>`;
+            const base = `<rect x="0" y="0" width="${L.width_m}" height="${L.height_m}" fill="#fffdf7"/>` + (this.showDecor ? decorSvg(L.elements) : '');
             const bg = L.background_url ? `<image href="${esc(L.background_url)}" x="0" y="0" width="${L.width_m}" height="${L.height_m}" preserveAspectRatio="none" opacity="${L.background_opacity}"/>` : '';
             const gridRect = `<rect x="0" y="0" width="${L.width_m}" height="${L.height_m}" fill="url(#g1)"/><rect x="0" y="0" width="${L.width_m}" height="${L.height_m}" fill="url(#g5)" stroke="#133e23" stroke-width="0.08"/>`;
             const stands = this.slots.map((s) => {
@@ -218,10 +222,38 @@ export function mapEditor(config) {
         zoomOut() { this.vp.zoom(1 / 1.3); },
         fit() { this.vp.fit(); },
 
+        /* Decor (zone, clădiri, etichete): import / export JSON — validat de server la salvare. */
+        exportDecor() {
+            this.decorJson = JSON.stringify(this.layout.elements || [], null, 1);
+            this.decorError = null;
+        },
+        applyDecor() {
+            try {
+                const parsed = JSON.parse(this.decorJson || '[]');
+                if (!Array.isArray(parsed)) throw new Error('array');
+                this.layout.elements = parsed;
+                this.decorDirty = true;
+                this.dirty = true;
+                this.decorError = null;
+                this.render();
+            } catch (e) {
+                this.decorError = config.labels.decorInvalid;
+            }
+        },
+        clearDecor() {
+            if (!confirm(config.labels.confirmClearDecor)) return;
+            this.layout.elements = [];
+            this.decorJson = '[]';
+            this.decorDirty = true;
+            this.dirty = true;
+            this.render();
+        },
+
         async save() {
             this.saving = true; this.error = null; this.message = null;
             const payload = {
                 layout: { width_m: Number(this.layout.width_m), height_m: Number(this.layout.height_m), background_opacity: Number(this.layout.background_opacity), name: this.layout.name },
+                ...(this.decorDirty ? { elements: this.layout.elements || [] } : {}),
                 slots: this.slots.map((s) => ({
                     id: s.id > 0 ? s.id : null, code: String(s.code).trim(), label: s.label || null,
                     x: Number(s.x), y: Number(s.y), width: Number(s.width), height: Number(s.height), rotation: Number(s.rotation || 0),
@@ -237,6 +269,8 @@ export function mapEditor(config) {
                 return;
             }
             this.slots = r.data.slots.map((s) => ({ ...s, price: s.price === null ? '' : s.price }));
+            this.layout.elements = r.data.layout.elements || [];
+            this.decorDirty = false;
             this.selectedId = null;
             this.dirty = false;
             this.history = [];

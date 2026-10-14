@@ -1,4 +1,4 @@
-import { createViewport, slotSvg } from './svg-viewport';
+import { createViewport, slotSvg, decorSvg } from './svg-viewport';
 
 /**
  * Harta interactivă a standurilor (producător / public / CRM).
@@ -54,7 +54,7 @@ export function standMap(config) {
             this.slots = r.data.slots;
             if (this.selected) this.selected = this.slots.find((s) => s.id === this.selected.id) || null;
             this.render();
-            if (first) this.vp.fit();
+            if (first) this.focus();
         },
 
         colorsFor(slot) {
@@ -72,7 +72,7 @@ export function standMap(config) {
                 const [f, st, t] = this.colorsFor(s);
                 return slotSvg(s, f, st, t);
             }).join('');
-            this.$refs.layer.innerHTML = frame + bg + stands;
+            this.$refs.layer.innerHTML = frame + decorSvg(this.layout.elements) + bg + stands;
         },
 
         select(slot) {
@@ -83,7 +83,19 @@ export function standMap(config) {
 
         zoomIn() { this.vp.zoom(1.3); },
         zoomOut() { this.vp.zoom(1 / 1.3); },
-        reset() { this.vp.fit(); },
+        reset() { this.focus(); },
+
+        /** Încadrare pe standuri (+ context), ca să fie ușor de atins pe telefon; harta întreagă rămâne la un zoom-out. */
+        focus() {
+            if (!this.slots.length) { this.vp.fit(); return; }
+            const xs = this.slots.flatMap((s) => [s.x, s.x + s.width]);
+            const ys = this.slots.flatMap((s) => [s.y, s.y + s.height]);
+            const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+            const pad = Math.max(5, Math.max(x1 - x0, y1 - y0) * 0.15);
+            const bx = Math.max(-1, x0 - pad), by = Math.max(-1, y0 - pad);
+            const bw = Math.min(this.layout.width_m + 1, x1 + pad) - bx, bh = Math.min(this.layout.height_m + 1, y1 + pad) - by;
+            this.vp.fitBox(bx, by, bw, bh);
+        },
 
         statusLabel(status) { return config.labels?.status?.[status] || status; },
         canChoose() { return this.mode === 'producer' && this.selected && this.selected.status === 'available' && config.canReserve; },

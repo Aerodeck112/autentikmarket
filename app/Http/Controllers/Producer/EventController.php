@@ -94,6 +94,7 @@ class EventController extends Controller
                 'height_m' => $event->layout->height_m,
                 'background_url' => $event->layout->backgroundUrl(),
                 'background_opacity' => $event->layout->background_opacity,
+                'elements' => $event->layout->elements ?? [],
             ],
             'slots' => $event->slots()->get()->map(fn (EventSlot $s) => [
                 'id' => $s->id, 'code' => $s->code, 'label' => $s->label,

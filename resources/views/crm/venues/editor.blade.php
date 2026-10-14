@@ -9,7 +9,7 @@
             dataUrl: '{{ route('crm.layouts.data', $layout) }}',
             saveUrl: '{{ route('crm.layouts.sync', $layout) }}',
             prefix: '{{ $layout->venue->code }}',
-            labels: { saved: @js(__('Harta a fost salvată.')), saveError: @js(__('Salvarea a eșuat.')), confirmRenumber: @js(__('Renumerotezi toate standurile în ordine (rânduri, de la stânga la dreapta)?')) }
+            labels: { saved: @js(__('Harta a fost salvată.')), saveError: @js(__('Salvarea a eșuat.')), confirmRenumber: @js(__('Renumerotezi toate standurile în ordine (rânduri, de la stânga la dreapta)?')), decorInvalid: @js(__('JSON invalid: decorul trebuie să fie o listă de elemente.')), confirmClearDecor: @js(__('Elimini tot decorul hărții (zone, clădiri, etichete)? Standurile rămân.')) }
          })" class="grid gap-4 xl:grid-cols-[1fr_320px]">
         <div class="card overflow-hidden">
             {{-- toolbar --}}
@@ -28,6 +28,7 @@
                 <button type="button" class="btn-ghost btn-sm !px-2.5" @click="zoomIn()">＋</button>
                 <button type="button" class="btn-ghost btn-sm !px-2.5" @click="zoomOut()">−</button>
                 <button type="button" class="btn-ghost btn-sm !px-2.5" @click="fit()">⤢</button>
+                <label class="ml-1 flex items-center gap-1 text-xs"><input type="checkbox" class="rounded border-line text-forest" x-model="showDecor" @change="render()"> {{ __('Decor') }}</label>
                 <div class="ml-auto flex items-center gap-2">
                     <span x-show="dirty" class="text-xs text-amber-700">● {{ __('modificări nesalvate') }}</span>
                     <button type="button" class="btn-accent btn-sm" @click="save()" :disabled="saving">{{ __('Salvează harta') }}</button>
@@ -70,6 +71,18 @@
                 <label><span class="field-label">{{ __('Opacitate schiță') }}</span><input type="range" min="0" max="1" step="0.05" class="w-full" x-model.number="layout.background_opacity" @input="dirty = true; render()"></label>
                 <p class="text-xs text-ink-soft" x-text="slots.length + ' {{ __('standuri') }}'"></p>
             </div>
+
+            <details class="card card-pad space-y-2 text-sm" @toggle="if ($event.target.open && !decorJson) exportDecor()">
+                <summary class="cursor-pointer font-display text-lg">{{ __('Decor hartă') }} <span class="text-xs font-normal text-ink-soft" x-text="'(' + (layout.elements || []).length + ')'"></span></summary>
+                <p class="text-xs text-ink-soft">{{ __('Zonele verzi, clădirile, drumurile, etichetele și marcajele (WC, intrare) desenate sub standuri. Formatul este descris în docs/ARCHITECTURE.md; serverul validează fiecare element la salvare.') }}</p>
+                <textarea x-model="decorJson" rows="8" spellcheck="false" class="field-input font-mono text-[11px] leading-snug"></textarea>
+                <p x-show="decorError" x-text="decorError" class="text-xs text-red-700"></p>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" class="btn-ghost btn-sm" @click="applyDecor()">{{ __('Aplică') }}</button>
+                    <button type="button" class="btn-ghost btn-sm" @click="exportDecor()">{{ __('Reîncarcă') }}</button>
+                    <button type="button" class="btn-ghost btn-sm" @click="clearDecor()">{{ __('Elimină decorul') }}</button>
+                </div>
+            </details>
 
             <form method="POST" action="{{ route('crm.layouts.background', $layout) }}" enctype="multipart/form-data" class="card card-pad space-y-2 text-sm">@csrf
                 <h3 class="font-display text-lg">{{ __('Schiță de fundal') }}</h3>

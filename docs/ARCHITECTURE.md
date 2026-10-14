@@ -96,7 +96,8 @@ Hold-urile expirate sunt eliberate de scheduler (în fiecare minut), lazy la fie
 
 - Coordonatele sunt în **metri** (`x`, `y`, `width`, `height`, `rotation` în jurul centrului). SVG-ul folosește direct `viewBox` în metri.
 - **Editor** (CRM): `resources/js/map-editor.js`. Adăugare, drag, resize, rotire (mâner, butoane și tasta R), duplicare, ștergere, numerotare automată, preț, electricitate, blocare, undo, grilă de snap, schiță de fundal cu opacitate.
-- **Vizualizare** (producător, public, CRM): `resources/js/stand-map.js`. Pan, zoom cu rotița, pinch pe mobil, culori pe status.
+- **Vizualizare** (producător, public, CRM): `resources/js/stand-map.js`. Pan, zoom cu rotița, pinch pe mobil, culori pe status. La deschidere, harta se încadrează pe zona standurilor (ușor de atins pe telefon); butonul ⤢ revine la această încadrare.
+- **Decor** (`venue_layouts.elements` → copiat în `event_layouts.elements`): zone, clădiri, drumuri, etichete RO/HU și marcaje desenate sub standuri. JSON validat strict de `App\Support\LayoutElements` (tipuri și valori din listă albă, doar numere și texte scurte; textele sunt escapate la randare în `decorSvg()` din `resources/js/svg-viewport.js`).
 - **Versionare**: `venue_layouts` (master, versiune incrementată la salvare) → `event_layouts` / `event_slots` (snapshot la crearea evenimentului).
 
 ### Digitizarea schițelor Târgu Mureș / Reghin
@@ -109,7 +110,41 @@ Hold-urile expirate sunt eliberate de scheduler (în fiecare minut), lazy la fie
 6. Completezi prețul (gol = „tarif la cerere”), electricitatea și eventualele spații blocate. Salvezi.
 7. Setezi layout-ul ca **MASTER**. Evenimentele noi îl vor copia automat.
 
-Layout-urile seed-uite sunt grile DEMO provizorii, marcate ca atare, până la primirea schițelor reale.
+### Hărțile oficiale (versiunea 1.1.0)
+
+Schițele organizatorului au fost digitizate în `database/seeders/VenueSeeder.php`. Seeder-ul e rulat de migrația `2026_10_15_000200_seed_official_venue_layouts.php`.
+
+| Locație | Standuri | Decor |
+|---|---|---|
+| Târgu Mureș — curtea Merkur | `TM-01…TM-20` (`TM-03` = INFO, blocat) | magazinul Merkur, WC (cu traseu), râul, zonele verzi, aleea pietonală |
+| Reghin — piața Catedralei | `RG-01…RG-13` (`RG-02` = INFO, blocat) | Catedrala Greco-Catolică, statuia Cardinal Alexandru Todea, fântâna arteziană, piața pavată, zonele verzi, strada Aurel Vlaicu, accesul auto posibil |
+
+- Coordonatele sunt păstrate în pixelii schiței (A4, 1240×1754 px). Conversia presupune **stand = 3 × 3 m** (62 px). Scara reală se ajustează din editor după măsurători.
+- Prețurile rămân goale („tarif la cerere”) și electricitatea nebifată: nu apar în schițe.
+- Numele producătorilor din schițe **nu** sunt importate: alocarea se face prin fluxul de rezervare / atribuire din CRM.
+- Seeder-ul este idempotent. Noul layout devine MASTER doar dacă nu există unul sau dacă master-ul curent este grila DEMO din 1.0.0. Grila DEMO nu se șterge. Evenimentele existente își păstrează snapshot-ul.
+
+### Formatul decorului
+
+Coordonatele sunt în metri. Limite: 300 de elemente, 400 de puncte per zonă, texte de maxim 120 de caractere.
+
+```json
+[
+  {"type": "area", "kind": "green", "points": [[0,0],[10,0],[10,5]], "label": {"ro": "Parc", "hu": "Park"}, "label_at": [5,2], "label_size": 1.2},
+  {"type": "label", "at": [12,3], "text": {"ro": "Intrare", "hu": "Bejárat"}, "size": 1, "rotation": 0, "tone": "muted"},
+  {"type": "marker", "at": [20,8], "symbol": "wc", "r": 1.5},
+  {"type": "arrow", "kind": "entrance", "points": [[30,30],[25,25]], "width": 1.2, "smooth": false}
+]
+```
+
+| Câmp | Valori permise |
+|---|---|
+| `kind` (pentru `area`) | `ground`, `asphalt`, `paved`, `green`, `water`, `building`, `landmark`, `road`, `path` |
+| `symbol` | `wc`, `info`, `church`, `statue`, `parking`, `entrance`, `water`, `power` |
+| `tone` | `dark`, `muted`, `light`, `accent` |
+| `kind` (pentru `arrow`) | `entrance`, `route` |
+
+Editorul are un panou „Decor hartă” (import/export JSON) și o bifă care ascunde decorul în timpul lucrului.
 
 ## 8. Automatizări (scheduler)
 

@@ -36,6 +36,7 @@ class EventMapController extends Controller
             'layout' => [
                 'width_m' => $event->layout->width_m, 'height_m' => $event->layout->height_m,
                 'background_url' => $event->layout->backgroundUrl(), 'background_opacity' => $event->layout->background_opacity,
+                'elements' => $event->layout->elements ?? [],
             ],
             'slots' => $event->slots()->get()->map(function (EventSlot $s) use ($active) {
                 $r = $active->get($s->id);

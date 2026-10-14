@@ -48,7 +48,7 @@
     "src": "node_modules/@fontsource-variable/oswald/files/oswald-vietnamese-wght-normal.woff2"
   },
   "node_modules/jsqr/dist/jsQR.js": {
-    "file": "assets/jsQR-BfRf4Glz.js",
+    "file": "assets/jsQR-B39TXRj_.js",
     "name": "jsQR",
     "src": "node_modules/jsqr/dist/jsQR.js",
     "isDynamicEntry": true,
@@ -57,7 +57,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-CpmwuLzg.css",
+    "file": "assets/app-qjkAVk-7.css",
     "name": "app",
     "names": [
       "app.css"
@@ -80,7 +80,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DxxyAQOs.js",
+    "file": "assets/app-C8SsWUYs.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

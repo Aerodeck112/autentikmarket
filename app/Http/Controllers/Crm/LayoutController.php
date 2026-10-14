@@ -7,6 +7,7 @@ use App\Models\LayoutSlot;
 use App\Models\Venue;
 use App\Models\VenueLayout;
 use App\Services\AuditLogger;
+use App\Support\LayoutElements;
 use App\Support\Uploads;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use InvalidArgumentException;
 
 /**
  * EDITOR HARTĂ: layout-ul master al locației (nu afectează evenimentele existente — vezi snapshot).
@@ -60,7 +62,18 @@ class LayoutController extends Controller
             'slots.*.has_electricity' => ['boolean'],
             'slots.*.is_blocked' => ['boolean'],
             'slots.*.notes' => ['nullable', 'string', 'max:255'],
+            'elements' => ['sometimes', 'nullable', 'array', 'max:'.LayoutElements::MAX_ELEMENTS],
         ]);
+
+        // Decorul se trimite doar când a fost modificat; altfel rămâne neatins.
+        $elements = null;
+        if ($request->has('elements')) {
+            try {
+                $elements = LayoutElements::sanitize($request->input('elements') ?? []);
+            } catch (InvalidArgumentException $e) {
+                throw ValidationException::withMessages(['elements' => $e->getMessage()]);
+            }
+        }
 
         $codes = array_map(fn ($s) => strtoupper(trim($s['code'])), $data['slots']);
         $dupes = array_unique(array_diff_assoc($codes, array_unique($codes)));
@@ -68,7 +81,10 @@ class LayoutController extends Controller
             throw ValidationException::withMessages(['slots' => __('Coduri duplicate: :c', ['c' => implode(', ', $dupes)])]);
         }
 
-        DB::transaction(function () use ($layout, $data) {
+        DB::transaction(function () use ($layout, $data, $elements) {
+            if ($elements !== null) {
+                $layout->elements = $elements;
+            }
             $layout->update([
                 'width_m' => $data['layout']['width_m'],
                 'height_m' => $data['layout']['height_m'],
@@ -163,6 +179,7 @@ class LayoutController extends Controller
             'layout' => [
                 'id' => $layout->id, 'name' => $layout->name, 'width_m' => $layout->width_m, 'height_m' => $layout->height_m,
                 'background_url' => $layout->backgroundUrl(), 'background_opacity' => $layout->background_opacity, 'version' => $layout->version,
+                'elements' => $layout->elements ?? [],
             ],
             'slots' => $layout->slots()->get()->map(fn (LayoutSlot $s) => [
                 'id' => $s->id, 'code' => $s->code, 'label' => $s->label, 'x' => $s->x, 'y' => $s->y,
