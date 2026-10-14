@@ -20,10 +20,15 @@
     # Blochează fișierele ascunse (.env, .git etc.) — cu excepția .well-known (SSL)
     RewriteRule (^|/)\.(?!well-known/) - [F,L]
 
+    # Aplicație urcată direct în public_html (document root neschimbabil): adresele externe
+    # cu /public/ în față → adresa curată, ca să nu existe conținut duplicat.
+    RewriteCond %{THE_REQUEST} \s/+public(/[^\s?]*)?[\s?] [NC]
+    RewriteRule ^(.*)$ /$1 [L,R=301,NE]
+
     # Redirect Trailing Slashes If Not A Folder...
+    # (calea relativă la public/, corectă și când aplicația e servită prin .htaccess-ul din rădăcină)
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
-    RewriteRule ^ %1 [L,R=301]
+    RewriteRule ^(.+)/$ /$1 [L,R=301,NE]
 
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d

@@ -11,11 +11,20 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Blochează fișierele ascunse și directoarele sensibile
+    # Blochează fișierele ascunse (.env, .git …), cu excepția .well-known (AutoSSL)
     RewriteRule (^|/)\.(?!well-known/) - [F,L]
-    RewriteRule ^(app|bootstrap|config|database|lang|resources|routes|storage|tests|vendor|node_modules|releases|docs)(/|$) - [F,L]
+
+    # /index.php în față → adresa curată (adresele /public/… sunt tratate în public/.htaccess)
+    RewriteCond %{THE_REQUEST} \s/+index\.php[\s?/] [NC]
+    RewriteRule ^index\.php/?(.*)$ /$1 [R=301,L,NE]
+
+    # Codul aplicației nu este accesibil din web.
+    # NU blocăm /storage/: adresele /storage/… sunt fișierele publice încărcate (public/storage),
+    # iar regula finală le trimite în public/, deci storage/ din rădăcină (loguri, documente) rămâne inaccesibil.
+    RewriteRule ^(app|bootstrap|config|database|lang|resources|routes|tests|vendor|node_modules|releases|docs)(/|$) - [F,L]
     RewriteRule ^(artisan|composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml|vite\.config\.js|VERSION|README\.md)$ - [F,L]
 
+    # Tot restul → public/
     RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
