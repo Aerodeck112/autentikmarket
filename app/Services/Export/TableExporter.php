@@ -2,6 +2,7 @@
 
 namespace App\Services\Export;
 
+use App\Services\AuditLogger;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Writer\XLSX\Writer as XlsxWriter;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -19,6 +20,8 @@ class TableExporter
     {
         $format = $format === 'xlsx' ? 'xlsx' : 'csv';
         $filename = preg_replace('/[^A-Za-z0-9._-]+/', '-', $filename).'.'.$format;
+        // Exporturile conțin date personale: fiecare descărcare rămâne în audit (cine, ce fișier, când).
+        AuditLogger::log('export.downloaded', null, [], ['file' => $filename, 'format' => $format]);
 
         if ($format === 'xlsx') {
             return new StreamedResponse(function () use ($headers, $rows) {
