@@ -1,0 +1,102 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/inter';
+@plugin '@tailwindcss/forms';
+
+@source '../views/**/*.blade.php';
+@source '../js/**/*.js';
+@source '../../app/**/*.php';
+
+/*
+ * DESIGN TOKENS — Autentik Market
+ * Paleta caldă, naturală, editorială. Culorile oficiale ale brandului se pot aplica aici, dintr-un singur loc.
+ */
+@theme {
+    --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-serif: 'Fraunces Variable', ui-serif, Georgia, serif;
+
+    --color-cream: #f6f1e7;
+    --color-paper: #fbf8f2;
+    --color-sand: #ece3d2;
+    --color-ink: #1e2620;
+    --color-ink-soft: #4a5249;
+    --color-forest: #2f4a3a;
+    --color-forest-dark: #233a2d;
+    --color-moss: #5d7550;
+    --color-clay: #b4532a;
+    --color-clay-dark: #95421f;
+    --color-honey: #d9a43b;
+    --color-sage: #8c9a7e;
+    --color-line: #e2d8c5;
+
+    --radius-card: 1.25rem;
+    --shadow-soft: 0 1px 2px rgb(30 38 32 / 0.04), 0 8px 24px -12px rgb(30 38 32 / 0.18);
+    --shadow-lift: 0 2px 4px rgb(30 38 32 / 0.06), 0 22px 40px -18px rgb(30 38 32 / 0.35);
+
+    --animate-rise: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+}
+
+@layer base {
+    html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+    body { @apply bg-paper text-ink antialiased; font-feature-settings: 'ss01', 'cv11'; }
+    h1, h2, h3, .font-display { font-family: var(--font-serif); font-optical-sizing: auto; letter-spacing: -0.015em; }
+    ::selection { background: var(--color-honey); color: var(--color-ink); }
+    [x-cloak] { display: none !important; }
+    :focus-visible { outline: 2px solid var(--color-clay); outline-offset: 2px; }
+}
+
+@layer components {
+    /* Componentele aplică doar utilitare Tailwind native (cerință Tailwind v4). */
+    .container-site { @apply mx-auto w-full max-w-7xl px-5 sm:px-8; }
+    .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.18em] text-clay; }
+
+    .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50; }
+    .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 bg-forest text-cream hover:bg-forest-dark active:scale-[0.98]; }
+    .btn-accent { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 bg-clay text-white hover:bg-clay-dark active:scale-[0.98]; }
+    .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 border border-ink/15 bg-white/60 text-ink hover:border-ink/40 hover:bg-white; }
+    .btn-danger { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 bg-red-700 text-white hover:bg-red-800; }
+    .btn-sm { @apply px-3.5 py-1.5 text-xs; }
+    .btn-lg { @apply px-7 py-3.5 text-base; }
+
+    .card { @apply rounded-[var(--radius-card)] border border-line bg-white shadow-[var(--shadow-soft)]; }
+    .card-pad { @apply p-5 sm:p-6; }
+
+    .field-label { @apply mb-1.5 block text-sm font-medium text-ink; }
+    .field-input { @apply block w-full rounded-xl border-line bg-white px-3.5 py-2.5 text-sm text-ink shadow-none placeholder:text-ink-soft/50 focus:border-forest focus:ring-forest/30; }
+    .field-help { @apply mt-1 text-xs text-ink-soft; }
+    .field-error { @apply mt-1 text-xs font-medium text-red-700; }
+
+    .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-5 whitespace-nowrap; }
+    .badge-ro { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-5 whitespace-nowrap bg-[#e7eef9] text-[#1f4f8f] ring-1 ring-[#1f4f8f]/15; }
+    .badge-hu { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-5 whitespace-nowrap bg-[#eaf4ea] text-[#2d6a32] ring-1 ring-[#2d6a32]/15; }
+
+    .table-crm { @apply w-full text-left text-sm; }
+    .table-crm th { @apply border-b border-line bg-cream/60 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-ink-soft; }
+    .table-crm td { @apply border-b border-line/70 px-4 py-3 align-middle; }
+    .table-crm tbody tr { @apply transition hover:bg-cream/40; }
+
+    .prose-am { @apply max-w-none text-[1.05rem] leading-relaxed text-ink-soft; }
+    .prose-am p { @apply mb-4; }
+    .prose-am h2 { @apply mt-8 mb-3 text-2xl text-ink; }
+    .prose-am ul { @apply mb-4 list-disc pl-6; }
+    .prose-am a { @apply text-clay underline underline-offset-4; }
+
+    .chip { @apply inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-sm font-medium text-ink-soft transition hover:border-forest hover:text-forest; }
+    .chip-active { @apply border-forest bg-forest text-cream hover:text-cream; }
+
+    .grain { position: relative; }
+    .grain::after {
+        content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.35; mix-blend-mode: multiply;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.45 0 0 0 0 0.35 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* Hartă standuri */
+    .stand { cursor: pointer; transition: filter 0.15s, opacity 0.15s; }
+    .stand:hover { filter: brightness(1.06); }
+    .stand-label { pointer-events: none; font-family: var(--font-sans); font-weight: 700; }
+}

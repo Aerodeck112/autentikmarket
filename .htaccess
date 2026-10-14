@@ -1,0 +1,23 @@
+# ---------------------------------------------------------------------------
+# Autentik Market — .htaccess RĂDĂCINĂ (varianta de rezervă pentru cPanel)
+#
+# Varianta RECOMANDATĂ: document root-ul domeniului indică direct /public
+# (cPanel → Domains → Document Root). În acest caz fișierul de față nu este folosit.
+#
+# Dacă document root-ul NU poate fi schimbat și aplicația este urcată direct în
+# public_html, acest fișier redirecționează totul către /public și blochează
+# accesul la restul directoarelor (app, config, storage, vendor, .env …).
+# ---------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Blochează fișierele ascunse și directoarele sensibile
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+    RewriteRule ^(app|bootstrap|config|database|lang|resources|routes|storage|tests|vendor|node_modules|releases|docs)(/|$) - [F,L]
+    RewriteRule ^(artisan|composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml|vite\.config\.js|VERSION|README\.md)$ - [F,L]
+
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+Options -Indexes
