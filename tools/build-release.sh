@@ -35,6 +35,9 @@ cp -a "$ROOT/releases/manifests/." "$STAGE/releases/manifests/" 2>/dev/null || t
 echo "→ composer install --no-dev"
 ( cd "$STAGE" && COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction --no-progress --no-scripts )
 find "$STAGE/vendor" -type d -name .git -prune -exec rm -rf {} +
+# Fără suitele de teste / CI / docs ale pachetelor (nefolosite în producție; ~110 MB la instalările din sursă).
+# Doar la nivelul rădăcinii fiecărui pachet (vendor/<vendor>/<pachet>/tests), nu în codul sursă.
+find "$STAGE/vendor" -mindepth 3 -maxdepth 3 -type d \( -name tests -o -name Tests -o -name test -o -name .github -o -name benchmarks \) -prune -exec rm -rf {} +
 
 echo "→ npm ci && npm run build"
 ( cd "$STAGE" && npm ci --no-audit --no-fund && npm run build && rm -rf node_modules )
