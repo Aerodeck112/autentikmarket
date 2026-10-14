@@ -13,14 +13,32 @@
 ## 1. Upload
 
 1. Primiți pachetul `autentikmarket-install-X.Y.Z.zip` (ultima versiune, generat cu `tools/build-release.sh X.Y.Z --install`; conține deja `vendor/` și `public/build/`). Instalați direct ultima versiune: nu e nevoie să instalați 1.0.0 și apoi update-urile.
-2. cPanel → **File Manager** → în directorul home (ex. `/home/USER/`), **nu** în `public_html`: Upload → Extract. Rezultă `/home/USER/autentikmarket/`.
+2. Varianta A (document root modificabil): cPanel → **File Manager** → în directorul home (ex. `/home/USER/`), **nu** în `public_html`: Upload → Extract. Rezultă `/home/USER/autentikmarket/`.
+3. Varianta B (document root fix pe `public_html`): urmați pașii din §2 B.
 
 ## 2. Document root
 
-**Varianta recomandată:** domeniul indică direct directorul `public`.
-- cPanel → **Domains** → autentikmarket.ro → *Document Root* = `/home/USER/autentikmarket/public`.
+### Varianta A: domeniul indică directorul `public`
 
-**Varianta de rezervă** (dacă document root-ul nu poate fi schimbat): extrageți aplicația direct în `public_html/`. `.htaccess`-ul din rădăcină redirecționează totul către `public/` și blochează accesul la `app/`, `config/`, `storage/`, `vendor/`, `.env` etc. Verificați după instalare că `https://autentikmarket.ro/.env` și `https://autentikmarket.ro/storage/` răspund cu **403/404**.
+Se folosește când cPanel permite schimbarea document root-ului (de regulă la addon domains și subdomenii):
+- cPanel → **Domains** → domeniul → *Document Root* = `/home/USER/autentikmarket/public`.
+
+### Varianta B: document root fix (`public_html`)
+
+Domeniul principal al contului are de obicei document root-ul fixat pe `public_html`. Aplicația se extrage **direct în `public_html`**:
+
+1. File Manager → `public_html` → ștergeți fișierele implicite ale hostingului (ex. `index.html`, `default.html`, `cgi-bin` gol), dacă există.
+2. Upload `autentikmarket-install-X.Y.Z.zip` în `public_html` → Extract. Rezultă folderul `public_html/autentikmarket/`.
+3. Intrați în `public_html/autentikmarket/` → **Select All** (bifați și fișierele ascunse: *Settings → Show Hidden Files*, pentru `.htaccess` și `.env.example`) → **Move** → destinația `/public_html`. Apoi ștergeți folderul gol `autentikmarket` și arhiva ZIP.
+4. În `public_html` trebuie să existe acum direct `app/`, `public/`, `vendor/`, `artisan`, `.htaccess` etc.
+
+În pașii următori, „directorul aplicației” este `/home/USER/public_html` (în loc de `/home/USER/autentikmarket`), inclusiv în comanda cron.
+
+`.htaccess`-ul din rădăcină trimite totul către `public/`. Fișierele încărcate rămân accesibile la `/storage/…`. Codul, `.env`, logurile, `vendor/` etc. răspund cu 403/404. Adresele cu `/public/…` sau `/index.php` redirecționează la adresa curată. Comportamentul este verificat pe Apache, cu un update instalat din CRM.
+
+După instalare verificați că `https://autentikmarket.ro/.env`, `https://autentikmarket.ro/vendor/autoload.php` și `https://autentikmarket.ro/storage/logs/laravel.log` răspund cu **403/404**.
+
+> `.htaccess`-ul din rădăcină este o cale protejată: **Update Manager nu îl modifică niciodată** (cPanel poate adăuga în el setări proprii, ex. versiunea PHP). Dacă vreo versiune viitoare va avea nevoie de o modificare acolo, notele de release o vor descrie ca pas manual.
 
 ## 3. Baza de date
 
