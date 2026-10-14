@@ -54,6 +54,9 @@ class SystemController extends Controller
         try {
             Artisan::call('optimize:clear');
             Artisan::call('optimize');
+            if (function_exists('opcache_reset')) {
+                @opcache_reset(); // altfel PHP poate servi câteva secunde config-ul vechi din opcache
+            }
         } catch (\Throwable $e) {
             report($e);
 

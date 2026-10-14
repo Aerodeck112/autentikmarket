@@ -10,6 +10,12 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Env;
+
+// Fără putenv(): procesele PHP-FPM / mod_php sunt refolosite între request-uri, iar valorile puse cu putenv()
+// ar rămâne în mediul procesului și ar masca modificările ulterioare din .env (vezi CRM → Sistem →
+// „Reîncarcă configurația” și pasul de cache al Update Manager-ului).
+Env::disablePutenv();
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(

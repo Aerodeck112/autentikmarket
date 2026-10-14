@@ -47,16 +47,28 @@ cPanel → **MySQL Databases**:
 2. Creați utilizatorul `USER_autentik` cu o parolă puternică.
 3. Adăugați utilizatorul la bază cu **ALL PRIVILEGES**.
 
-## 4. `.env`
+## 4. Instalatorul web (recomandat, fără Terminal)
 
-În File Manager copiați `.env.example` → `.env` și completați:
+Deschideți site-ul în browser (`https://autentikmarket.ro`). Cât timp nu există `.env`, el redirecționează automat la **`/install.php`**. Instalatorul:
+
+1. verifică serverul (versiunea PHP, extensiile, permisiunile, limitele de upload);
+2. cere **codul de instalare**. Îl găsiți în File Manager, în fișierul `storage/app/private/install-token.txt` (click dreapta → *View*). Codul dovedește că instalarea o face cineva cu acces la găzduire și nu poate fi citit de pe web;
+3. cere adresa site-ului, datele bazei de date (testează conexiunea), contul super admin și, opțional, SMTP;
+4. scrie `.env` (cu `APP_KEY` generat) și rulează `migrate`, `db:seed` (roluri, șabloane RO/HU, locațiile Târgu Mureș și Reghin cu hărțile oficiale), `storage:link`, crearea contului super admin și `optimize`;
+5. afișează comanda exactă pentru **cron** și se **blochează definitiv** (`storage/app/installed.lock`). Codul de instalare este șters.
+
+Dacă un pas eșuează (ex. parolă greșită la baza de date), instalarea poate fi reluată cu același cod. Dacă `storage:link` nu e permis de găzduire, imaginile încărcate sunt servite de aplicație la aceeași adresă `/storage/…`.
+
+**Fără Terminal, după instalare:** modificările făcute în `.env` din File Manager (ex. SMTP, `APP_URL` după SSL) se aplică din **CRM → Sistem → Reîncarcă configurația**.
+
+## 5. Instalare din Terminal (alternativă)
+
+Pachetul include deja `vendor/`, deci nu e nevoie de Composer. Dacă instalați din git (fără `vendor/`), rulați întâi `composer install --no-dev --optimize-autoloader`.
+
+Copiați `.env.example` → `.env` și completați cel puțin:
 
 ```dotenv
-APP_ENV=production
-APP_DEBUG=false
 APP_URL=https://autentikmarket.ro
-DB_CONNECTION=mysql        # sau mariadb
-DB_HOST=localhost
 DB_DATABASE=USER_autentik
 DB_USERNAME=USER_autentik
 DB_PASSWORD=********
@@ -65,68 +77,27 @@ MAIL_USERNAME=noreply@autentikmarket.ro
 MAIL_PASSWORD=********
 ```
 
+Apoi:
+
+```bash
+cd ~/autentikmarket                     # sau ~/public_html (varianta B)
+php artisan key:generate --force
+php artisan migrate --force
+php artisan db:seed --force              # roluri, șabloane, locațiile Târgu Mureș și Reghin cu hărțile oficiale
+php artisan storage:link
+php artisan app:create-super-admin       # interactiv; sau --email=… --first-name=… --last-name=… --password=… -n
+php artisan optimize
+```
+
 `.env` nu este suprascris niciodată de Update Manager.
 
-## 5. Composer
-
-Pachetul de instalare include deja `vendor/`, deci **nu** este nevoie să rulați Composer. Dacă instalați din git (fără `vendor/`), din Terminal:
-
-```bash
-cd ~/autentikmarket
-composer install --no-dev --optimize-autoloader
-```
-
-## 6. Cheia aplicației
-
-```bash
-cd ~/autentikmarket
-php artisan key:generate --force
-```
-
-Fără Terminal: generați local cheia cu `php artisan key:generate --show` și puneți-o în `APP_KEY=` din `.env`.
-
-## 7. Migrații și date inițiale
-
-```bash
-php artisan migrate --force
-php artisan db:seed --force              # locațiile Târgu Mureș și Reghin cu hărțile oficiale
-php artisan app:create-super-admin       # contul SUPER ADMIN (interactiv)
-```
-
-Rolurile, permisiunile și template-urile RO/HU sunt inserate automat de migrații.
-
-Contul super admin se poate crea și fără întrebări interactive:
-
-```bash
-php artisan app:create-super-admin --email=adresa@domeniu.ro --first-name=Prenume --last-name=Nume --password='ParolaPuternica!2026' -n
-```
-
-### Fără Terminal (SSH)
-
-Dacă pachetul de hosting nu are Terminal, comenzile de la pașii 6–8 se rulează **o singură dată** prin Cron Jobs:
-
-1. Adăugați un cron *Once Per Minute* cu comanda (pe un singur rând):
-   ```bash
-   cd /home/USER/autentikmarket && /usr/local/bin/php artisan key:generate --force && /usr/local/bin/php artisan migrate --force && /usr/local/bin/php artisan db:seed --force && /usr/local/bin/php artisan storage:link >> /home/USER/install.log 2>&1
-   ```
-2. Așteptați 1–2 minute, verificați `install.log` în File Manager și **ștergeți imediat cronul**.
-3. La fel, un cron temporar pentru `app:create-super-admin ... -n`. Ștergeți-l după primul minut: conține parola.
-
-## 8. Storage
-
-```bash
-php artisan storage:link
-```
-
-Dacă hostingul nu permite symlink-uri: cPanel → File Manager → creați manual linkul `public/storage` → `../storage/app/public`, sau cereți suportului să activeze `FollowSymLinks`.
-
-## 9. Permisiuni
+## 6. Permisiuni
 
 - Directoare `755`, fișiere `644`.
 - `storage/` și `bootstrap/cache/` trebuie să poată fi scrise de utilizatorul PHP (pe cPanel cu suPHP/PHP-FPM, utilizatorul contului: `755` e suficient).
 - Pentru Update Manager, utilizatorul PHP trebuie să poată scrie în `app/`, `config/`, `resources/`, `routes/`, `database/`, `lang/`, `public/build/`, `vendor/`. Pe cPanel standard, fișierele aparțin contului, deci condiția este îndeplinită. Pre-flight check-ul verifică oricum înainte de fiecare update.
 
-## 10. Cron
+## 7. Cron
 
 cPanel → **Cron Jobs** → *Common settings: Once Per Minute* (`* * * * *`):
 
@@ -136,30 +107,28 @@ cPanel → **Cron Jobs** → *Common settings: Once Per Minute* (`* * * * *`):
 
 Calea PHP corectă (`/usr/local/bin/php` sau `/opt/cpanel/ea-php83/root/usr/bin/php`) apare în MultiPHP Manager. Detalii în `CRON.md`.
 
-## 11. SMTP
+## 8. SMTP
 
 - cPanel → **Email Accounts** → creați `noreply@autentikmarket.ro`.
 - *Connect Devices* afișează serverul SMTP (de regulă `mail.autentikmarket.ro`, port 465 SSL), care se completează în `.env`.
 - CRM → Setări → **Trimite email test**. Rezultatul apare în CRM → Automatizări → Jurnal notificări (queued → sent / failed).
 - Recomandat: SPF, DKIM, DMARC active (cPanel → Email Deliverability).
 
-## 12. Cache (producție)
+## 9. Cache (producție)
 
-```bash
-php artisan optimize        # config + rute + view-uri + evenimente
-```
+Instalatorul web și fiecare update construiesc automat cache-urile (config, rute, view-uri, evenimente).
 
-După orice modificare manuală în `.env`: `php artisan optimize:clear && php artisan optimize`.
+După orice modificare manuală în `.env`: **CRM → Sistem → Reîncarcă configurația** (sau, din Terminal, `php artisan optimize:clear && php artisan optimize`).
 
-## 13. SSL
+## 10. SSL
 
-> `.env.example` are `SESSION_SECURE_COOKIE=true`. Fără HTTPS, autentificarea nu funcționează. Activați SSL **înainte** de prima logare.
+> Ideal, activați SSL **înainte** de instalare și deschideți instalatorul cu `https://`: instalatorul pune atunci `SESSION_SECURE_COOKIE=true`. Instalat pe `http://`, pune `false`, ca autentificarea să funcționeze până la activarea SSL.
 
 - cPanel → **SSL/TLS Status** → AutoSSL (Let's Encrypt) pentru domeniu.
-- Apoi decomentați în `public/.htaccess` regula de redirect HTTPS.
-- `.env`: `SESSION_SECURE_COOKIE=true`.
+- `.env` (File Manager): `APP_URL=https://…` și `SESSION_SECURE_COOKIE=true`, apoi CRM → Sistem → **Reîncarcă configurația**.
+- Opțional: decomentați în `public/.htaccess` regula de redirect HTTPS (cPanel are și opțiunea *Force HTTPS Redirect* la Domains).
 
-## 14. Test final
+## 11. Test final
 
 - [ ] `https://autentikmarket.ro` redirecționează spre `/ro` (sau `/hu` pentru browsere în maghiară)
 - [ ] `/ro` și `/hu` se încarcă, iar switcher-ul RO/HU păstrează pagina

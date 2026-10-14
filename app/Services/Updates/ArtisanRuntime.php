@@ -65,6 +65,10 @@ class ArtisanRuntime implements ApplicationRuntime
         if ($code !== 0) {
             throw new UpdateException("Reconstruirea cache-ului a eșuat:\n".Artisan::output());
         }
+        // Fișierele de cache tocmai rescrise nu trebuie servite din opcache în versiunea veche.
+        if (function_exists('opcache_reset')) {
+            @opcache_reset();
+        }
     }
 
     public function checkDatabase(): bool

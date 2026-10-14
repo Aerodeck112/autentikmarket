@@ -12,7 +12,9 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 
 // Instalare nouă (fără .env): instalatorul web, pentru găzduirile fără Terminal.
 if (! file_exists(__DIR__.'/../.env') && file_exists(__DIR__.'/install.php')) {
-    header('Location: '.rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php'), '/\\').'/install.php', true, 302);
+    $dir = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php'), '/\\');
+    $dir = str_ends_with($dir, '/public') ? substr($dir, 0, -7) : $dir; // aplicație urcată direct în public_html
+    header('Location: '.$dir.'/install.php', true, 302);
     exit;
 }
 
