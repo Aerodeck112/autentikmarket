@@ -43,7 +43,7 @@ echo "→ release:build"
 cp "$STAGE/.env.example" "$STAGE/.env"
 ( cd "$STAGE" && php artisan key:generate --force -q && php artisan package:discover -q && php artisan release:build "$VERSION" "$@" )
 
-mkdir -p "$ROOT/releases/dist"
+mkdir -p "$ROOT/releases/dist" "$ROOT/releases/manifests"
 cp "$STAGE"/releases/dist/*"$VERSION"*.zip "$ROOT/releases/dist/"
 cp "$STAGE/releases/manifests/$VERSION.json" "$ROOT/releases/manifests/"
 rm -rf "$STAGE"
