@@ -72,9 +72,9 @@
         @foreach ([['title' => __('Vizitatori'), 'ro' => $s['visitors_ro'], 'hu' => $s['visitors_hu'], 'rop' => $s['visitors_ro_pct'], 'hup' => $s['visitors_hu_pct']], ['title' => __('Producători'), 'ro' => $s['producers_ro'], 'hu' => $s['producers_hu'], 'rop' => $s['producers_ro_pct'], 'hup' => $s['producers_hu_pct']]] as $l)
             <div class="card card-pad">
                 <h2 class="text-xl">{{ __('Limbi') }} — {{ $l['title'] }}</h2>
-                <div class="mt-4 flex h-8 overflow-hidden rounded-full text-xs font-bold text-white">
-                    <div class="flex items-center justify-center bg-[#1f4f8f]" style="width: {{ max($l['rop'], 0.5) }}%">@if ($l['rop'] >= 10) RO {{ $l['rop'] }}% @endif</div>
-                    <div class="flex items-center justify-center bg-[#2d6a32]" style="width: {{ max($l['hup'], 0.5) }}%">@if ($l['hup'] >= 10) HU {{ $l['hup'] }}% @endif</div>
+                <div class="mt-4 flex h-8 overflow-hidden rounded-full text-xs font-bold">
+                    <div class="flex items-center justify-center bg-forest text-cream" style="width: {{ max($l['rop'], 0.5) }}%">@if ($l['rop'] >= 10) RO {{ $l['rop'] }}% @endif</div>
+                    <div class="flex items-center justify-center bg-sun text-forest-dark" style="width: {{ max($l['hup'], 0.5) }}%">@if ($l['hup'] >= 10) HU {{ $l['hup'] }}% @endif</div>
                 </div>
                 <div class="mt-3 flex justify-between text-sm">
                     <span><x-lang-badge lang="ro" /> {{ $l['ro'] }} ({{ $l['rop'] }}%)</span>

@@ -106,10 +106,10 @@
                 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-line p-4">
                     <h2 class="text-xl">4. {{ __('Harta târgului') }}</h2>
                     <div class="flex flex-wrap gap-3 text-xs">
-                        <span class="flex items-center gap-1"><i class="size-3 rounded bg-[#e3efe0] ring-1 ring-[#5d7550]"></i>{{ __('Disponibil') }}</span>
-                        <span class="flex items-center gap-1"><i class="size-3 rounded bg-[#fbe9c6] ring-1 ring-[#d9a43b]"></i>{{ __('Rezervat temporar') }}</span>
-                        <span class="flex items-center gap-1"><i class="size-3 rounded bg-[#e7d6cc] ring-1 ring-[#95421f]"></i>{{ __('Ocupat') }}</span>
-                        <span class="flex items-center gap-1"><i class="size-3 rounded bg-[#2f4a3a]"></i>{{ __('Al meu') }}</span>
+                        <span class="flex items-center gap-1"><i class="size-3 rounded bg-[#e6f3dc] ring-1 ring-[#75bd50]"></i>{{ __('Disponibil') }}</span>
+                        <span class="flex items-center gap-1"><i class="size-3 rounded bg-[#f0dba2] ring-1 ring-[#dd8d2b]"></i>{{ __('Rezervat temporar') }}</span>
+                        <span class="flex items-center gap-1"><i class="size-3 rounded bg-[#ead8c4] ring-1 ring-[#874e09]"></i>{{ __('Ocupat') }}</span>
+                        <span class="flex items-center gap-1"><i class="size-3 rounded bg-[#1d5733]"></i>{{ __('Al meu') }}</span>
                     </div>
                 </div>
                 <div class="relative">

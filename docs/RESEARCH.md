@@ -55,21 +55,36 @@ Seed-ul aplicației conține categorii editabile: *Miere & produse apicole; Lact
 ## 5. Identitate vizuală — audit
 
 - Site-ul actual nu are un sistem vizual definit: temă WordPress implicită, logo afișat ca imagine (alt text: „targul micilor fermieri si producatori”) și o grafică de eveniment.
-- **Nu am putut extrage oficial culorile sau fonturile logo-ului.** Paleta platformei este construită pornind de la mesajele proiectului (natural, cald, uman). Este definită prin **design tokens** (variabile CSS în `resources/css/app.css`), astfel încât culorile oficiale să poată fi aplicate ulterior dintr-un singur loc.
-- Logo-ul oficial se încarcă din **CRM → Setări → Identitate**. Până atunci este afișat un wordmark tipografic „Autentik Market”.
+- **Identitatea oficială a fost furnizată de proprietar** (sigla orizontală „Autentik Market by My Family Center” și sigla rotundă). Culorile au fost extrase din pixelii siglei:
 
-### Direcție vizuală propusă
-
-| Token | Valoare | Rol |
+| Culoare oficială | Hex | Token |
 |---|---|---|
-| `--color-cream` | `#F6F1E7` | fundal cald, „hârtie” |
-| `--color-ink` | `#1E2620` | text, contrast editorial |
-| `--color-forest` | `#2F4A3A` | culoare principală (verde profund, nu „eco generic”) |
-| `--color-clay` | `#B4532A` | accent teracotă (CTA, pământ, ceramică) |
-| `--color-honey` | `#D9A43B` | accent miere (progres, recompense) |
-| `--color-sage` | `#8C9A7E` | secundar, ilustrații discrete |
+| verde închis | `#1D5733` | `--color-forest` (principală, text pe titluri, butoane primare) |
+| portocaliu soare | `#DD8D2B` | `--color-sun` (CTA accent, cu text verde închis) |
+| grâu | `#F0DBA2` | `--color-wheat` (suprafețe calde, selecție, „în curs”) |
+| verde crud | `#75BD50` | `--color-leaf` (doar suprafețe/grafică, niciodată text mic) |
 
-- Tipografie: **Fraunces** (serif expresiv, editorial, pentru titluri) + **Inter** (UI, lizibil pe mobil). Fonturile sunt self-hosted prin `@fontsource` și împachetate în build, fără request-uri către Google Fonts (motive GDPR).
+- Derivate pentru accesibilitate (WCAG AA), toate în `resources/css/app.css`:
+  - `--color-forest-dark` `#133E23` pentru fundaluri închise;
+  - `--color-clay` `#A35F0C`, portocaliu închis pentru linkuri și text accent (4,9:1 pe crem);
+  - `--color-cream` `#FAF3E1` / `--color-paper` `#FFFDF7` pentru fundaluri;
+  - `--color-ink` `#1A2B20` pentru text.
+- Reguli de contrast:
+  - textul alb pe portocaliul oficial nu trece (2,65:1), așa că butonul accent are fundal soare și text verde închis (4,55:1);
+  - portocaliul pur se folosește ca text doar pe verde închis.
+- Fișierele siglei sunt în `public/images/brand/` (PNG + WebP; variantele `-light` au verdele recolorat în crem, pentru fundaluri închise):
+  - `logo-wordmark` pentru header;
+  - `logo-horizontal` pentru footer, cu „by My Family Center”;
+  - `logo-stacked` pentru hero;
+  - `emblem` pentru favicon și iconurile PWA.
+- Componenta `<x-logo>` folosește aceste fișiere. Un logo încărcat în **CRM → Setări → Identitate** (`brand.logo_path`) are prioritate.
+
+### Direcție vizuală
+
+- Tipografie:
+  - **Oswald**, un condensed bold apropiat de literele înalte din siglă, pentru titluri;
+  - **Inter** pentru UI, lizibil pe mobil.
+- Fonturile sunt self-hosted prin `@fontsource` și împachetate în build, fără request-uri către Google Fonts (motive GDPR).
 - Fără „frunze peste tot”. Vedetele vizuale sunt **fotografiile reale** ale producătorilor, oamenilor și produselor, încărcate din CRM (hero, galerie, profiluri). Unde nu există încă fotografii, layout-ul folosește blocuri tipografice și culoare, nu imagini stoc.
 
 ## 6. Ton de comunicare

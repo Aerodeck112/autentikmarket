@@ -4,7 +4,7 @@
         <h1 class="mt-3 text-5xl sm:text-6xl">{{ __('Recenzii') }}</h1>
         <p class="mt-4 max-w-2xl text-lg text-ink-soft">{{ __('Doar vizitatorii care au cumpărat efectiv de la un producător la târg pot lăsa o recenzie. Fiecare recenzie este moderată.') }}</p>
         @if ($total)
-            <p class="mt-6 font-display text-3xl"><span class="text-honey">★ {{ $average }}</span> <span class="text-lg text-ink-soft">/ 5 · {{ $total }} {{ __('recenzii') }}</span></p>
+            <p class="mt-6 font-display text-3xl"><span class="text-clay">★ {{ $average }}</span> <span class="text-lg text-ink-soft">/ 5 · {{ $total }} {{ __('recenzii') }}</span></p>
         @endif
         @if ($reviews->isEmpty())
             <x-empty class="mt-10" :title="__('Încă nu există recenzii')" :text="__('După fiecare târg, vizitatorii primesc invitația de a evalua producătorii de la care au cumpărat.')" />

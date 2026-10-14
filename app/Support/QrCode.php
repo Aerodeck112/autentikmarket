@@ -12,7 +12,7 @@ use chillerlan\QRCode\QROptions;
  */
 class QrCode
 {
-    public static function svg(string $data, string $color = '#1E2620'): string
+    public static function svg(string $data, string $color = '#133E23'): string
     {
         $options = new QROptions([
             'outputInterface' => QRMarkupSVG::class,

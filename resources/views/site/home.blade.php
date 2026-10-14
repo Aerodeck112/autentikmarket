@@ -38,14 +38,12 @@
                         <img src="{{ $gallery[1]->url() }}" alt="" class="absolute bottom-0 right-0 h-[55%] w-[64%] rounded-[2rem] object-cover shadow-[var(--shadow-lift)] ring-8 ring-paper">
                         <img src="{{ $gallery[2]->thumbUrl() }}" alt="" class="absolute bottom-[18%] left-[6%] size-28 rounded-full object-cover ring-8 ring-paper">
                     @else
-                        <div class="absolute inset-0 overflow-hidden rounded-[2.5rem] bg-forest text-cream shadow-[var(--shadow-lift)] grain">
-                            <div class="absolute inset-x-0 top-0 flex h-16">
-                                @for ($i = 0; $i < 8; $i++)<div class="flex-1 {{ $i % 2 ? 'bg-cream/90' : 'bg-clay' }} rounded-b-full"></div>@endfor
-                            </div>
-                            <div class="relative z-10 flex h-full flex-col justify-end p-8">
-                                <p class="font-display text-4xl leading-tight">{{ __('Local.') }}<br>{{ __('Autentic.') }}<br><span class="text-honey">{{ __('Uman.') }}</span></p>
-                                <p class="mt-4 text-sm text-cream/70">{{ __('Comunitate · Calitate · Producători reali') }}</p>
-                            </div>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center overflow-hidden rounded-[2.5rem] bg-cream p-8 text-center shadow-[var(--shadow-lift)] ring-1 ring-line grain">
+                            <div class="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-sun/20 blur-3xl"></div>
+                            <div class="pointer-events-none absolute -bottom-24 -left-16 size-64 rounded-full bg-leaf/20 blur-3xl"></div>
+                            <x-logo variant="stacked" size="lg" class="relative z-10" />
+                            <p class="relative z-10 mt-8 font-display text-3xl leading-tight text-forest">{{ __('Local.') }} {{ __('Autentic.') }} <span class="text-clay">{{ __('Uman.') }}</span></p>
+                            <p class="relative z-10 mt-3 text-sm text-ink-soft">{{ __('Comunitate · Calitate · Producători reali') }}</p>
                         </div>
                     @endif
                 </div>

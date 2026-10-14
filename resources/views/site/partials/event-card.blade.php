@@ -11,7 +11,7 @@
                 <p class="font-display text-3xl leading-none">{{ $event->event_date->format('j') }}</p>
             </div>
             <div>
-                <p class="text-xs uppercase tracking-[0.2em] text-honey">{{ $event->event_date->locale(app()->getLocale())->translatedFormat('l') }}</p>
+                <p class="text-xs uppercase tracking-[0.2em] text-wheat">{{ $event->event_date->locale(app()->getLocale())->translatedFormat('l') }}</p>
                 <p class="font-display text-2xl leading-tight">{{ $event->localizedCity() }}</p>
             </div>
         </div>

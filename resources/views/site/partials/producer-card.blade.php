@@ -4,7 +4,7 @@
         @if ($producer->coverUrl())
             <img src="{{ $producer->coverUrl() }}" alt="{{ $producer->brand_name }}" loading="lazy" class="size-full object-cover transition duration-700 group-hover:scale-105">
         @else
-            <div class="grid size-full place-items-center bg-gradient-to-br from-sand via-cream to-[#e8dcc4] grain">
+            <div class="grid size-full place-items-center bg-gradient-to-br from-sand via-cream to-wheat grain">
                 <span class="font-display text-6xl text-forest/70">{{ $producer->initials() }}</span>
             </div>
         @endif
@@ -21,7 +21,7 @@
             <p class="text-sm text-ink-soft">{{ $producer->city }}</p>
         </div>
         @if (($producer->rating ?? null) > 0)
-            <span class="shrink-0 text-sm font-semibold text-honey">★ {{ number_format($producer->rating, 1) }}</span>
+            <span class="shrink-0 text-sm font-semibold text-clay">★ {{ number_format($producer->rating, 1) }}</span>
         @endif
     </div>
 </a>

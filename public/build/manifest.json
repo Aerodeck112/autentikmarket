@@ -1,16 +1,4 @@
 {
-  "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-ext-wght-normal.woff2": {
-    "file": "assets/fraunces-latin-ext-wght-normal-Ca2vKHc0.woff2",
-    "src": "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-ext-wght-normal.woff2"
-  },
-  "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2": {
-    "file": "assets/fraunces-latin-wght-normal-ukD16Tqj.woff2",
-    "src": "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2"
-  },
-  "node_modules/@fontsource-variable/fraunces/files/fraunces-vietnamese-wght-normal.woff2": {
-    "file": "assets/fraunces-vietnamese-wght-normal-CnvboYUG.woff2",
-    "src": "node_modules/@fontsource-variable/fraunces/files/fraunces-vietnamese-wght-normal.woff2"
-  },
   "node_modules/@fontsource-variable/inter/files/inter-cyrillic-ext-wght-normal.woff2": {
     "file": "assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2",
     "src": "node_modules/@fontsource-variable/inter/files/inter-cyrillic-ext-wght-normal.woff2"
@@ -39,8 +27,28 @@
     "file": "assets/inter-vietnamese-wght-normal-CBcvBZtf.woff2",
     "src": "node_modules/@fontsource-variable/inter/files/inter-vietnamese-wght-normal.woff2"
   },
+  "node_modules/@fontsource-variable/oswald/files/oswald-cyrillic-ext-wght-normal.woff2": {
+    "file": "assets/oswald-cyrillic-ext-wght-normal-DLWmRmaW.woff2",
+    "src": "node_modules/@fontsource-variable/oswald/files/oswald-cyrillic-ext-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/oswald/files/oswald-cyrillic-wght-normal.woff2": {
+    "file": "assets/oswald-cyrillic-wght-normal-C8sJyxwB.woff2",
+    "src": "node_modules/@fontsource-variable/oswald/files/oswald-cyrillic-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/oswald/files/oswald-latin-ext-wght-normal.woff2": {
+    "file": "assets/oswald-latin-ext-wght-normal-Dj_1K-Kw.woff2",
+    "src": "node_modules/@fontsource-variable/oswald/files/oswald-latin-ext-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/oswald/files/oswald-latin-wght-normal.woff2": {
+    "file": "assets/oswald-latin-wght-normal-CzS3kehr.woff2",
+    "src": "node_modules/@fontsource-variable/oswald/files/oswald-latin-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/oswald/files/oswald-vietnamese-wght-normal.woff2": {
+    "file": "assets/oswald-vietnamese-wght-normal-Tdf5mmdl.woff2",
+    "src": "node_modules/@fontsource-variable/oswald/files/oswald-vietnamese-wght-normal.woff2"
+  },
   "node_modules/jsqr/dist/jsQR.js": {
-    "file": "assets/jsQR-BH3CKP1g.js",
+    "file": "assets/jsQR-BfRf4Glz.js",
     "name": "jsQR",
     "src": "node_modules/jsqr/dist/jsQR.js",
     "isDynamicEntry": true,
@@ -49,7 +57,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-C6nKweoe.css",
+    "file": "assets/app-CpmwuLzg.css",
     "name": "app",
     "names": [
       "app.css"
@@ -57,9 +65,11 @@
     "src": "resources/css/app.css",
     "isEntry": true,
     "assets": [
-      "assets/fraunces-vietnamese-wght-normal-CnvboYUG.woff2",
-      "assets/fraunces-latin-ext-wght-normal-Ca2vKHc0.woff2",
-      "assets/fraunces-latin-wght-normal-ukD16Tqj.woff2",
+      "assets/oswald-cyrillic-ext-wght-normal-DLWmRmaW.woff2",
+      "assets/oswald-cyrillic-wght-normal-C8sJyxwB.woff2",
+      "assets/oswald-vietnamese-wght-normal-Tdf5mmdl.woff2",
+      "assets/oswald-latin-ext-wght-normal-Dj_1K-Kw.woff2",
+      "assets/oswald-latin-wght-normal-CzS3kehr.woff2",
       "assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2",
       "assets/inter-cyrillic-wght-normal-DqGufNeO.woff2",
       "assets/inter-greek-ext-wght-normal-DlzME5K_.woff2",
@@ -70,7 +80,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-3a5VL_bU.js",
+    "file": "assets/app-DxxyAQOs.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

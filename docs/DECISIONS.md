@@ -109,7 +109,8 @@ Trei niveluri de protecție, fără încredere în frontend:
 - Asset-urile compilate (`public/build`) sunt versionate în git. Instalarea inițială pe cPanel nu necesită Node, iar pachetele ZIP le includ oricum.
 
 ### D-20: Fonturi self-hosted
-- `@fontsource-variable/fraunces` și `@fontsource-variable/inter` sunt împachetate de Vite. Fără request-uri externe (GDPR) și fără dependență de CDN.
+- `@fontsource-variable/oswald` (titluri, apropiat de literele siglei oficiale) și `@fontsource-variable/inter` (UI) sunt împachetate de Vite. Fără request-uri externe (GDPR) și fără dependență de CDN.
+- Fraunces, folosit inițial, a fost înlocuit după primirea siglei oficiale. Culorile oficiale sunt descrise în RESEARCH §5.
 
 ### D-21: Ștergerea conturilor = anonimizare
 - Datele statistice (check-in, interacțiuni) se păstrează, dar datele personale sunt anonimizate (`first_name = "Utilizator"`, `email = deleted-{id}@invalid`).

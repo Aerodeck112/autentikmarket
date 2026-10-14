@@ -4,16 +4,17 @@ import { createViewport, slotSvg } from './svg-viewport';
  * Harta interactivă a standurilor (producător / public / CRM).
  * Fără WebSocket: polling JSON la N secunde.
  */
+// Paleta oficială: verde crud = liber, grâu/soare = în curs, verde închis = al meu.
 const COLORS = {
-    available: ['#e3efe0', '#5d7550', '#233a2d'],
-    hold: ['#fbe9c6', '#d9a43b', '#6b4f12'],
-    requested: ['#fde2c8', '#c8742e', '#6b3410'],
-    reserved: ['#e7d6cc', '#95421f', '#4a1f0c'],
-    occupied: ['#e7d6cc', '#95421f', '#4a1f0c'],
-    blocked: ['#e5e2dc', '#9c968c', '#6b665e'],
-    unavailable: ['#e5e2dc', '#9c968c', '#6b665e'],
-    mine: ['#2f4a3a', '#1e2620', '#f6f1e7'],
-    selected: ['#b4532a', '#1e2620', '#ffffff'],
+    available: ['#e6f3dc', '#75bd50', '#133e23'],
+    hold: ['#f7ebc8', '#dd8d2b', '#6b430a'],
+    requested: ['#f0dba2', '#dd8d2b', '#6b430a'],
+    reserved: ['#ead8c4', '#874e09', '#4d2c05'],
+    occupied: ['#ead8c4', '#874e09', '#4d2c05'],
+    blocked: ['#e7e4dc', '#a39d8f', '#5f5a50'],
+    unavailable: ['#e7e4dc', '#a39d8f', '#5f5a50'],
+    mine: ['#1d5733', '#133e23', '#faf3e1'],
+    selected: ['#dd8d2b', '#133e23', '#133e23'],
 };
 
 export function standMap(config) {
@@ -66,7 +67,7 @@ export function standMap(config) {
             const bg = this.layout.background_url
                 ? `<image href="${this.layout.background_url}" x="0" y="0" width="${this.layout.width_m}" height="${this.layout.height_m}" preserveAspectRatio="none" opacity="${this.layout.background_opacity}"/>`
                 : '';
-            const frame = `<rect x="0" y="0" width="${this.layout.width_m}" height="${this.layout.height_m}" fill="#fbf8f2" stroke="#e2d8c5" stroke-width="0.1"/>`;
+            const frame = `<rect x="0" y="0" width="${this.layout.width_m}" height="${this.layout.height_m}" fill="#fffdf7" stroke="#e9ddbf" stroke-width="0.1"/>`;
             const stands = this.slots.map((s) => {
                 const [f, st, t] = this.colorsFor(s);
                 return slotSvg(s, f, st, t);

@@ -1,7 +1,7 @@
 /* Autentik Market — Service Worker pentru zona Staff (PWA).
  * Strategie: network-first pentru pagini (datele trebuie să fie live), cache pentru asset-urile statice din /build.
  * Fără server Node: fișier static servit de Apache. */
-const CACHE = 'am-staff-v1';
+const CACHE = 'am-staff-v2';
 
 self.addEventListener('install', (e) => {
     self.skipWaiting();
@@ -28,7 +28,7 @@ self.addEventListener('fetch', (e) => {
 
     if (e.request.mode === 'navigate' && url.pathname.startsWith('/staff')) {
         e.respondWith(fetch(e.request).catch(() => new Response(
-            '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><body style="font-family:sans-serif;background:#233a2d;color:#f6f1e7;display:grid;place-items:center;min-height:100vh;text-align:center"><div><h1>Offline</h1><p>Fără conexiune la internet. Check-in-ul necesită conexiune.<br>Nincs internetkapcsolat.</p></div></body>',
+            '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><body style="font-family:sans-serif;background:#133e23;color:#faf3e1;display:grid;place-items:center;min-height:100vh;text-align:center"><div><h1>Offline</h1><p>Fără conexiune la internet. Check-in-ul necesită conexiune.<br>Nincs internetkapcsolat.</p></div></body>',
             { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
         )));
     }

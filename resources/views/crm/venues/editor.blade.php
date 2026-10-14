@@ -35,7 +35,7 @@
             </div>
             <p x-show="message" x-text="message" class="bg-emerald-50 px-3 py-2 text-sm text-emerald-800"></p>
             <p x-show="error" x-text="error" class="bg-red-50 px-3 py-2 text-sm text-red-800"></p>
-            <svg x-ref="svg" class="block h-[70vh] w-full touch-none select-none bg-[#f4f1ea]" preserveAspectRatio="xMidYMid meet"><g x-ref="layer"></g></svg>
+            <svg x-ref="svg" class="block h-[70vh] w-full touch-none select-none bg-[#f6f1e2]" preserveAspectRatio="xMidYMid meet"><g x-ref="layer"></g></svg>
             <p class="border-t border-line px-3 py-2 text-xs text-ink-soft">{{ __('Trage standurile pentru a le muta · mânerul portocaliu = redimensionare · cercul alb = rotire (Alt = liber) · săgeți = 10 cm (Shift = 1 m) · rotița/pinch = zoom · trage fundalul = pan') }}</p>
         </div>
 

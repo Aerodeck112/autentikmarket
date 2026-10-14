@@ -5,9 +5,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#2f4a3a">
+    <meta name="theme-color" content="#1d5733">
     <x-seo :title="$title" :description="$description" :image="$image" :noindex="$noindex" />
-    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="icon" href="{{ asset('icons/favicon-64.png') }}" type="image/png">
+    <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{ $head ?? '' }}
 </head>
@@ -15,7 +17,7 @@
 <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-cream">{{ __('Sari la conținut') }}</a>
 
 <header x-data="{ open: false, scrolled: false }" @scroll.window="scrolled = window.scrollY > 12"
-        :class="scrolled ? 'bg-paper/90 shadow-[0_1px_0_#e2d8c5] backdrop-blur' : 'bg-transparent'"
+        :class="scrolled ? 'bg-paper/90 shadow-[0_1px_0_var(--color-line)] backdrop-blur' : 'bg-transparent'"
         class="sticky top-0 z-40 transition-all duration-300">
     <div class="container-site flex h-[72px] items-center justify-between gap-6">
         <a href="{{ lroute('home') }}" aria-label="Autentik Market — {{ __('Acasă') }}"><x-logo /></a>
@@ -82,7 +84,7 @@
 <footer class="mt-24 bg-forest-dark text-cream/80 grain">
     <div class="container-site relative z-10 grid gap-12 py-16 md:grid-cols-12">
         <div class="md:col-span-5">
-            <x-logo light size="lg" />
+            <x-logo light size="lg" variant="horizontal" />
             <p class="mt-5 max-w-sm text-sm leading-relaxed text-cream/70">
                 {{ __('Târg lunar de producători locali și artizani. Oameni reali, produse autentice, cumpărate direct de la cei care le fac.') }}
             </p>

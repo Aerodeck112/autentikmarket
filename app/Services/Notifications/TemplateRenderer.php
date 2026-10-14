@@ -26,7 +26,7 @@ class TemplateRenderer
         $escaped = e($text);
         $linked = preg_replace(
             '~(https?://[^\s<]+)~u',
-            '<a href="$1" style="color:#B4532A">$1</a>',
+            '<a href="$1" style="color:#A35F0C">$1</a>',
             $escaped
         );
         $paragraphs = preg_split("/\R{2,}/", trim((string) $linked)) ?: [];

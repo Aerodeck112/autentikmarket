@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/oswald';
 @import '@fontsource-variable/inter';
 @plugin '@tailwindcss/forms';
 
@@ -9,29 +9,46 @@
 
 /*
  * DESIGN TOKENS — Autentik Market
- * Paleta caldă, naturală, editorială. Culorile oficiale ale brandului se pot aplica aici, dintr-un singur loc.
+ * Culorile OFICIALE din logo (extrase din fișierele furnizate):
+ *   verde închis #1D5733 · portocaliu soare #DD8D2B · grâu #F0DBA2 · verde crud #75BD50
+ * Restul nuanțelor sunt derivate din acestea. Reguli de contrast (WCAG AA):
+ *   - butonul accent = fundal portocaliu + text verde închis (4.55:1); NU text alb pe portocaliu;
+ *   - text / linkuri accent = portocaliu închis #A35F0C (4.9:1);
+ *   - verdele crud doar ca suprafață/decor, nu ca text mic.
  */
 @theme {
     --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
-    --font-serif: 'Fraunces Variable', ui-serif, Georgia, serif;
+    --font-serif: 'Oswald Variable', 'Arial Narrow', ui-sans-serif, sans-serif;
+    --font-display: 'Oswald Variable', 'Arial Narrow', ui-sans-serif, sans-serif;
 
-    --color-cream: #f6f1e7;
-    --color-paper: #fbf8f2;
-    --color-sand: #ece3d2;
-    --color-ink: #1e2620;
-    --color-ink-soft: #4a5249;
-    --color-forest: #2f4a3a;
-    --color-forest-dark: #233a2d;
-    --color-moss: #5d7550;
-    --color-clay: #b4532a;
-    --color-clay-dark: #95421f;
-    --color-honey: #d9a43b;
-    --color-sage: #8c9a7e;
-    --color-line: #e2d8c5;
+    /* oficiale */
+    --color-brand-green: #1d5733;
+    --color-brand-sun: #dd8d2b;
+    --color-brand-wheat: #f0dba2;
+    --color-brand-leaf: #75bd50;
+
+    /* roluri (nume păstrate în tot codul) */
+    --color-forest: #1d5733;
+    --color-forest-dark: #133e23;
+    --color-moss: #2f6e3f;
+    --color-leaf: #75bd50;
+    --color-sun: #dd8d2b;
+    --color-sun-light: #e9a04a;
+    --color-wheat: #f0dba2;
+    --color-clay: #a35f0c;
+    --color-clay-dark: #874e09;
+    --color-honey: #dd8d2b;
+    --color-sage: #75bd50;
+    --color-cream: #faf3e1;
+    --color-paper: #fffdf7;
+    --color-sand: #f3e4ba;
+    --color-ink: #1a2b20;
+    --color-ink-soft: #4b5a4f;
+    --color-line: #e9ddbf;
 
     --radius-card: 1.25rem;
-    --shadow-soft: 0 1px 2px rgb(30 38 32 / 0.04), 0 8px 24px -12px rgb(30 38 32 / 0.18);
-    --shadow-lift: 0 2px 4px rgb(30 38 32 / 0.06), 0 22px 40px -18px rgb(30 38 32 / 0.35);
+    --shadow-soft: 0 1px 2px rgb(19 62 35 / 0.05), 0 8px 24px -12px rgb(19 62 35 / 0.2);
+    --shadow-lift: 0 2px 4px rgb(19 62 35 / 0.07), 0 22px 40px -18px rgb(19 62 35 / 0.38);
 
     --animate-rise: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
@@ -44,8 +61,10 @@
 @layer base {
     html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
     body { @apply bg-paper text-ink antialiased; font-feature-settings: 'ss01', 'cv11'; }
-    h1, h2, h3, .font-display { font-family: var(--font-serif); font-optical-sizing: auto; letter-spacing: -0.015em; }
-    ::selection { background: var(--color-honey); color: var(--color-ink); }
+    /* Titluri condensate, în spiritul literelor din logo */
+    h1, h2, h3, .font-display { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.005em; line-height: 1.08; }
+    h1 em, h2 em, .font-display em { font-style: normal; }
+    ::selection { background: var(--color-wheat); color: var(--color-ink); }
     [x-cloak] { display: none !important; }
     :focus-visible { outline: 2px solid var(--color-clay); outline-offset: 2px; }
 }
@@ -53,11 +72,11 @@
 @layer components {
     /* Componentele aplică doar utilitare Tailwind native (cerință Tailwind v4). */
     .container-site { @apply mx-auto w-full max-w-7xl px-5 sm:px-8; }
-    .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.18em] text-clay; }
+    .eyebrow { @apply font-display text-[13px] font-medium uppercase tracking-[0.2em] text-clay; }
 
     .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50; }
     .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 bg-forest text-cream hover:bg-forest-dark active:scale-[0.98]; }
-    .btn-accent { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 bg-clay text-white hover:bg-clay-dark active:scale-[0.98]; }
+    .btn-accent { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 bg-sun text-forest-dark hover:bg-sun-light active:scale-[0.98]; }
     .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 border border-ink/15 bg-white/60 text-ink hover:border-ink/40 hover:bg-white; }
     .btn-danger { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 bg-red-700 text-white hover:bg-red-800; }
     .btn-sm { @apply px-3.5 py-1.5 text-xs; }
@@ -72,8 +91,8 @@
     .field-error { @apply mt-1 text-xs font-medium text-red-700; }
 
     .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-5 whitespace-nowrap; }
-    .badge-ro { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-5 whitespace-nowrap bg-[#e7eef9] text-[#1f4f8f] ring-1 ring-[#1f4f8f]/15; }
-    .badge-hu { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-5 whitespace-nowrap bg-[#eaf4ea] text-[#2d6a32] ring-1 ring-[#2d6a32]/15; }
+    .badge-ro { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-5 whitespace-nowrap bg-[#e3efe5] text-forest ring-1 ring-forest/20; }
+    .badge-hu { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-5 whitespace-nowrap bg-[#f7ebc8] text-clay-dark ring-1 ring-sun/40; }
 
     .table-crm { @apply w-full text-left text-sm; }
     .table-crm th { @apply border-b border-line bg-cream/60 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-ink-soft; }

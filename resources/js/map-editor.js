@@ -61,26 +61,26 @@ export function mapEditor(config) {
 
         render() {
             const L = this.layout;
-            const grid = `<defs><pattern id="g1" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0H0V1" fill="none" stroke="#e2d8c5" stroke-width="0.02"/></pattern>
-                <pattern id="g5" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M5 0H0V5" fill="none" stroke="#cfc3ab" stroke-width="0.05"/></pattern></defs>`;
-            const base = `<rect x="0" y="0" width="${L.width_m}" height="${L.height_m}" fill="#fbf8f2"/>`;
+            const grid = `<defs><pattern id="g1" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0H0V1" fill="none" stroke="#e9ddbf" stroke-width="0.02"/></pattern>
+                <pattern id="g5" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M5 0H0V5" fill="none" stroke="#d9c79a" stroke-width="0.05"/></pattern></defs>`;
+            const base = `<rect x="0" y="0" width="${L.width_m}" height="${L.height_m}" fill="#fffdf7"/>`;
             const bg = L.background_url ? `<image href="${esc(L.background_url)}" x="0" y="0" width="${L.width_m}" height="${L.height_m}" preserveAspectRatio="none" opacity="${L.background_opacity}"/>` : '';
-            const gridRect = `<rect x="0" y="0" width="${L.width_m}" height="${L.height_m}" fill="url(#g1)"/><rect x="0" y="0" width="${L.width_m}" height="${L.height_m}" fill="url(#g5)" stroke="#1e2620" stroke-width="0.08"/>`;
+            const gridRect = `<rect x="0" y="0" width="${L.width_m}" height="${L.height_m}" fill="url(#g1)"/><rect x="0" y="0" width="${L.width_m}" height="${L.height_m}" fill="url(#g5)" stroke="#133e23" stroke-width="0.08"/>`;
             const stands = this.slots.map((s) => {
                 const sel = s.id === this.selectedId;
-                const fill = s.is_blocked ? '#e5e2dc' : (sel ? '#f3d9c9' : '#e3efe0');
-                const stroke = sel ? '#b4532a' : (s.is_blocked ? '#9c968c' : '#5d7550');
-                return slotSvg(s, fill, stroke, '#1e2620', 'data-drag="1"');
+                const fill = s.is_blocked ? '#e7e4dc' : (sel ? '#f7ebc8' : '#e6f3dc');
+                const stroke = sel ? '#dd8d2b' : (s.is_blocked ? '#a39d8f' : '#75bd50');
+                return slotSvg(s, fill, stroke, '#133e23', 'data-drag="1"');
             }).join('');
             let handles = '';
             const s = this.selected;
             if (s) {
                 const cx = s.x + s.width / 2, cy = s.y + s.height / 2;
                 handles = `<g transform="translate(${cx} ${cy}) rotate(${s.rotation || 0})">
-                    <rect x="${-s.width / 2}" y="${-s.height / 2}" width="${s.width}" height="${s.height}" fill="none" stroke="#b4532a" stroke-width="0.06" stroke-dasharray="0.25 0.15" pointer-events="none"/>
-                    <circle data-handle="resize" cx="${s.width / 2}" cy="${s.height / 2}" r="0.35" fill="#b4532a" stroke="#fff" stroke-width="0.08" style="cursor:nwse-resize"/>
-                    <line x1="0" y1="${-s.height / 2}" x2="0" y2="${-s.height / 2 - 0.9}" stroke="#b4532a" stroke-width="0.06" pointer-events="none"/>
-                    <circle data-handle="rotate" cx="0" cy="${-s.height / 2 - 1}" r="0.3" fill="#fff" stroke="#b4532a" stroke-width="0.08" style="cursor:grab"/>
+                    <rect x="${-s.width / 2}" y="${-s.height / 2}" width="${s.width}" height="${s.height}" fill="none" stroke="#dd8d2b" stroke-width="0.06" stroke-dasharray="0.25 0.15" pointer-events="none"/>
+                    <circle data-handle="resize" cx="${s.width / 2}" cy="${s.height / 2}" r="0.35" fill="#dd8d2b" stroke="#fff" stroke-width="0.08" style="cursor:nwse-resize"/>
+                    <line x1="0" y1="${-s.height / 2}" x2="0" y2="${-s.height / 2 - 0.9}" stroke="#dd8d2b" stroke-width="0.06" pointer-events="none"/>
+                    <circle data-handle="rotate" cx="0" cy="${-s.height / 2 - 1}" r="0.3" fill="#fff" stroke="#dd8d2b" stroke-width="0.08" style="cursor:grab"/>
                 </g>`;
             }
             this.$refs.layer.innerHTML = grid + base + bg + gridRect + stands + handles;
