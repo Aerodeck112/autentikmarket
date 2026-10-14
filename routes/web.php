@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth;
 use App\Http\Controllers\Crm;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\Producer;
+use App\Http\Controllers\PublicStorageController;
 use App\Http\Controllers\Site;
 use App\Http\Controllers\Staff;
 use App\Services\Updates\UpdateManager;
@@ -19,6 +20,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', Site\LocaleRedirectController::class)->name('root');
 Route::get('/sitemap.xml', [Site\SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [Site\SeoController::class, 'robots'])->name('robots');
+// Imaginile publice când `storage:link` lipsește (găzduire fără Terminal); altfel le servește Apache direct.
+Route::get('/storage/{path}', PublicStorageController::class)->where('path', '.*')->name('storage.public')
+    ->withoutMiddleware('web');
 Route::get('/language/{locale}', [Site\LocaleRedirectController::class, 'switch'])->whereIn('locale', ['ro', 'hu'])->name('language.switch');
 
 foreach (Locales::supported() as $locale) {
@@ -343,6 +347,7 @@ Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->grou
     // SISTEM
     Route::get('/system', [Crm\SystemController::class, 'index'])->middleware('can:system.view')->name('system.index');
     Route::get('/system/audit', [Crm\SystemController::class, 'audit'])->middleware('can:audit.view')->name('system.audit');
+    Route::post('/system/refresh-config', [Crm\SystemController::class, 'refreshConfig'])->middleware(['can:system.update', 'throttle:6,1'])->name('system.refresh');
     Route::middleware('can:system.update')->prefix('system/updates')->name('updates.')->group(function () {
         Route::get('/', [Crm\UpdateController::class, 'index'])->name('index');
         Route::post('/', [Crm\UpdateController::class, 'upload'])->middleware('throttle:10,1')->name('upload');

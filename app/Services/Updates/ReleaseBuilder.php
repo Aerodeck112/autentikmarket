@@ -21,7 +21,7 @@ class ReleaseBuilder
         'app', 'bootstrap/app.php', 'bootstrap/providers.php', 'config',
         'database/migrations', 'database/seeders', 'database/factories',
         'lang', 'public/build', 'public/images', 'public/icons',
-        'public/index.php', 'public/.htaccess', 'public/favicon.ico', 'public/favicon.svg',
+        'public/index.php', 'public/install.php', 'public/.htaccess', 'public/favicon.ico', 'public/favicon.svg',
         'public/manifest.webmanifest', 'public/sw.js',
         'resources/views', 'resources/pdf', 'routes', 'artisan', 'composer.json', 'composer.lock', 'VERSION', 'docs',
     ];

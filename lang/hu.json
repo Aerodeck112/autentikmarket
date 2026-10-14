@@ -1133,5 +1133,10 @@
     "JSON invalid: decorul trebuie să fie o listă de elemente.": "Érvénytelen JSON: a díszletnek elemek listájának kell lennie.",
     "Elimini tot decorul hărții (zone, clădiri, etichete)? Standurile rămân.": "Törlöd a térkép teljes díszletét (zónák, épületek, feliratok)? A standok megmaradnak.",
     "Prea multe elemente de decor (maxim :n).": "Túl sok díszletelem (legfeljebb :n).",
-    "Element de decor invalid (#:i, :what).": "Érvénytelen díszletelem (#:i, :what)."
+    "Element de decor invalid (#:i, :what).": "Érvénytelen díszletelem (#:i, :what).",
+    "Reîncărcarea configurației a eșuat: :m": "A konfiguráció újratöltése sikertelen: :m",
+    "Configurația a fost reîncărcată (inclusiv modificările din .env).": "A konfiguráció újratöltve (a .env módosításaival együtt).",
+    "Reîncarci configurația? Se citesc din nou valorile din .env și se reconstruiesc cache-urile.": "Újratöltöd a konfigurációt? A .env értékei újra beolvasásra kerülnek, a gyorsítótárak újraépülnek.",
+    "După modificarea fișierului .env din File Manager": "A .env fájl File Managerben történő módosítása után",
+    "Reîncarcă configurația": "Konfiguráció újratöltése"
 }

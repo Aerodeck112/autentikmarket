@@ -1,6 +1,7 @@
 <x-layouts.crm :title="__('Sistem')">
     <x-slot:actions>
         @can('system.update')<a href="{{ route('crm.updates.index') }}" class="btn-primary">{{ __('Actualizări') }}</a>@endcan
+        @can('system.update')<form method="POST" action="{{ route('crm.system.refresh') }}" onsubmit="return confirm(@js(__('Reîncarci configurația? Se citesc din nou valorile din .env și se reconstruiesc cache-urile.')))">@csrf<button class="btn-ghost" title="{{ __('După modificarea fișierului .env din File Manager') }}">⟳ {{ __('Reîncarcă configurația') }}</button></form>@endcan
         @can('audit.view')<a href="{{ route('crm.system.audit') }}" class="btn-ghost">{{ __('Audit log') }}</a>@endcan
     </x-slot:actions>
     <div class="grid gap-6 lg:grid-cols-3">

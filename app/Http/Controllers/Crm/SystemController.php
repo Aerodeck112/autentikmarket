@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Crm;
 use App\Http\Controllers\Controller;
 use App\Models\ApplicationUpdate;
 use App\Models\AuditLog;
+use App\Services\AuditLogger;
 use App\Support\AppVersion;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -40,6 +43,25 @@ class SystemController extends Controller
             ],
             'lastUpdate' => ApplicationUpdate::where('status', 'completed')->latest('finished_at')->first(),
         ]);
+    }
+
+    /**
+     * Reîncarcă .env + cache-urile (config, rute, view-uri) — echivalentul `php artisan optimize:clear && optimize`,
+     * pentru găzduirile fără Terminal (ex. după modificarea .env din File Manager).
+     */
+    public function refreshConfig(): RedirectResponse
+    {
+        try {
+            Artisan::call('optimize:clear');
+            Artisan::call('optimize');
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->with('error', __('Reîncărcarea configurației a eșuat: :m', ['m' => $e->getMessage()]));
+        }
+        AuditLogger::log('system.config_refreshed');
+
+        return back()->with('success', __('Configurația a fost reîncărcată (inclusiv modificările din .env).'));
     }
 
     public function audit(Request $request): View
