@@ -55,7 +55,6 @@ return [
         'public/images/',
         'public/icons/',
         'public/index.php',
-        'public/install.php',
         'public/.htaccess',
         'public/favicon.ico',
         'public/favicon.svg',

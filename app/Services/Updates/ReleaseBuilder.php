@@ -21,13 +21,16 @@ class ReleaseBuilder
         'app', 'bootstrap/app.php', 'bootstrap/providers.php', 'config',
         'database/migrations', 'database/seeders', 'database/factories',
         'lang', 'public/build', 'public/images', 'public/icons',
-        'public/index.php', 'public/install.php', 'public/.htaccess', 'public/favicon.ico', 'public/favicon.svg',
+        'public/index.php', 'public/.htaccess', 'public/favicon.ico', 'public/favicon.svg',
         'public/manifest.webmanifest', 'public/sw.js',
         'resources/views', 'resources/pdf', 'routes', 'artisan', 'composer.json', 'composer.lock', 'VERSION', 'docs',
     ];
 
     /** Căi suplimentare pentru pachetul de INSTALARE inițială. */
     public const INSTALL_EXTRA = [
+        // Instalatorul web: doar în pachetul de instalare. Pachetele de update nu pot conține PHP în public/
+        // (PathGuard) — după instalare oricum se blochează singur.
+        'public/install.php',
         '.env.example', '.htaccess', 'storage', 'bootstrap/cache/.gitignore', 'README.md',
         'resources/css', 'resources/js', 'package.json', 'package-lock.json', 'vite.config.js', 'phpunit.xml', 'tests',
     ];
