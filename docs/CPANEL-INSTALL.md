@@ -110,8 +110,10 @@ Calea PHP corectă (`/usr/local/bin/php` sau `/opt/cpanel/ea-php83/root/usr/bin/
 ## 8. SMTP
 
 - cPanel → **Email Accounts** → creați `noreply@autentikmarket.ro`.
-- *Connect Devices* afișează serverul SMTP (de regulă `mail.autentikmarket.ro`, port 465 SSL), care se completează în `.env`.
-- CRM → Setări → **Trimite email test**. Rezultatul apare în CRM → Automatizări → Jurnal notificări (queued → sent / failed).
+- *Connect Devices* afișează serverul SMTP (de regulă `mail.autentikmarket.ro`, port 465 SSL).
+- Datele se completează în **CRM → Setări → E-mail (SMTP)** (din versiunea 1.2.0; au prioritate față de `MAIL_*` din `.env`). Parola se păstrează criptată.
+- **Salvează și trimite test** trimite imediat și afișează eroarea serverului, explicată (parolă, certificat, port, expeditor).
+- Dacă certificatul serverului de e-mail e emis pentru alt nume (des întâlnit pe hosting partajat), folosiți ca server numele din *Connect Devices* sau debifați verificarea certificatului.
 - Recomandat: SPF, DKIM, DMARC active (cPanel → Email Deliverability).
 
 ## 9. Cache (producție)
