@@ -336,6 +336,7 @@ Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->grou
         Route::get('/settings', [Crm\SettingsController::class, 'index'])->name('settings.index');
         Route::put('/settings', [Crm\SettingsController::class, 'update'])->name('settings.update');
         Route::post('/settings/test-email', [Crm\SettingsController::class, 'testEmail'])->middleware('throttle:forms')->name('settings.test-email');
+        Route::put('/settings/mail', [Crm\SettingsController::class, 'updateMail'])->middleware('throttle:forms')->name('settings.mail');
         Route::get('/contact-messages', [Crm\SettingsController::class, 'messages'])->name('messages.index');
         Route::post('/contact-messages/{message}/handled', [Crm\SettingsController::class, 'handled'])->name('messages.handled');
     });

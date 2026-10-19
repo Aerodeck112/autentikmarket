@@ -3,16 +3,20 @@
 namespace App\Http\Controllers\Crm;
 
 use App\Http\Controllers\Controller;
+use App\Mail\TemplatedMail;
 use App\Models\ContactMessage;
 use App\Services\AuditLogger;
-use App\Services\Notifications\NotificationService;
+use App\Support\MailSettings;
 use App\Support\Settings;
 use App\Support\Uploads;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Throwable;
 
 class SettingsController extends Controller
 {
@@ -20,11 +24,19 @@ class SettingsController extends Controller
     {
         return view('crm.settings.index', [
             'mail' => [
+                'from_crm' => MailSettings::fromCrm(),
+                'delivers' => MailSettings::delivers(),
                 'mailer' => config('mail.default'),
-                'host' => config('mail.mailers.smtp.host'),
-                'port' => config('mail.mailers.smtp.port'),
-                'from' => config('mail.from.address'),
-                'name' => config('mail.from.name'),
+                'host' => Settings::get('mail.smtp_host') ?: config('mail.mailers.smtp.host'),
+                'port' => Settings::get('mail.smtp_port') ?: config('mail.mailers.smtp.port'),
+                'encryption' => Settings::get('mail.smtp_encryption') ?: ((int) config('mail.mailers.smtp.port') === 587 ? 'tls' : 'ssl'),
+                'username' => Settings::get('mail.smtp_username') ?: config('mail.mailers.smtp.username'),
+                'has_password' => (string) Settings::get('mail.smtp_password', '') !== '',
+                'verify_peer' => Settings::get('mail.smtp_verify_peer', '1') !== '0',
+                'from_address' => Settings::get('mail.from_address') ?: config('mail.from.address'),
+                'from_name' => Settings::get('mail.from_name') ?: config('mail.from.name'),
+                'queued' => DB::table('jobs')->count(),
+                'heartbeat' => Cache::get('scheduler.heartbeat'),
             ],
         ]);
     }
@@ -86,14 +98,85 @@ class SettingsController extends Controller
         return back()->with('success', __('Setările au fost salvate.'));
     }
 
-    /** Admin → Setări Email → „Trimite email test” (prin motorul de notificări + log). */
-    public function testEmail(Request $request, NotificationService $notifications): RedirectResponse
+    /**
+     * Setări → E-mail (SMTP): salvare în CRM (fără .env) și, opțional, test imediat.
+     * Parola goală = se păstrează cea salvată.
+     */
+    public function updateMail(Request $request): RedirectResponse
     {
-        $log = $notifications->send('TEST_EMAIL', $request->user(), [], ['dedupe_key' => 'test-email:'.$request->user()->id.':'.now()->format('YmdHis')]);
+        if ($request->input('action') === 'clear') {
+            foreach (['mail.smtp_host', 'mail.smtp_port', 'mail.smtp_encryption', 'mail.smtp_username', 'mail.smtp_password', 'mail.smtp_verify_peer', 'mail.from_address', 'mail.from_name'] as $key) {
+                Settings::set($key, '', 'mail');
+            }
+            AuditLogger::log('settings.mail_cleared');
 
-        return back()->with($log ? 'success' : 'error', $log
-            ? __('E-mailul de test a fost pus în coadă către :e (status: :s). Verifică jurnalul de notificări.', ['e' => $request->user()->email, 's' => $log->fresh()->status->label()])
-            : __('Template-ul TEST_EMAIL lipsește sau este inactiv.'));
+            return back()->with('success', __('Setările SMTP din CRM au fost șterse; se folosesc valorile din .env.'));
+        }
+
+        $data = $request->validate([
+            'smtp_host' => ['required', 'string', 'max:190', 'regex:/^[A-Za-z0-9.\-]+$/'],
+            'smtp_port' => ['required', 'integer', 'between:1,65535'],
+            'smtp_encryption' => ['required', 'in:'.implode(',', MailSettings::ENCRYPTIONS)],
+            'smtp_username' => ['nullable', 'string', 'max:190'],
+            'smtp_password' => ['nullable', 'string', 'max:190'],
+            'smtp_verify_peer' => ['nullable', 'boolean'],
+            'from_address' => ['nullable', 'email', 'max:190'],
+            'from_name' => ['nullable', 'string', 'max:120'],
+        ], ['smtp_host.regex' => __('Scrie doar numele serverului, fără https:// sau spații (de ex. mail.autentikmarket.ro).')]);
+
+        Settings::setMany([
+            'mail.smtp_host' => strtolower($data['smtp_host']),
+            'mail.smtp_port' => (string) $data['smtp_port'],
+            'mail.smtp_encryption' => $data['smtp_encryption'],
+            'mail.smtp_username' => trim((string) ($data['smtp_username'] ?? '')),
+            'mail.smtp_verify_peer' => $request->boolean('smtp_verify_peer') ? '1' : '0',
+            'mail.from_address' => trim((string) ($data['from_address'] ?? '')),
+            'mail.from_name' => trim((string) ($data['from_name'] ?? '')),
+        ], 'mail');
+        if (($data['smtp_password'] ?? '') !== '') {
+            Settings::set('mail.smtp_password', MailSettings::encryptPassword($data['smtp_password']), 'mail');
+        }
+        MailSettings::apply();
+        AuditLogger::log('settings.mail_updated', null, [], ['host' => $data['smtp_host'], 'port' => $data['smtp_port'], 'encryption' => $data['smtp_encryption']]);
+
+        if ($request->input('action') === 'test') {
+            return $this->sendTest($request);
+        }
+
+        return back()->with('success', __('Setările SMTP au fost salvate. Trimite un e-mail de test ca să verifici.'));
+    }
+
+    /** „Trimite email test”: trimis IMEDIAT (nu prin coadă), ca eroarea serverului să apară pe loc. */
+    public function testEmail(Request $request): RedirectResponse
+    {
+        return $this->sendTest($request);
+    }
+
+    protected function sendTest(Request $request): RedirectResponse
+    {
+        $to = $request->user()->email;
+        if (! MailSettings::delivers()) {
+            return back()->with('error', __('E-mailurile nu sunt trimise: aplicația este în modul „:m” (doar scrie mesajele în log). Completează datele SMTP mai jos și salvează.', ['m' => config('mail.default')]));
+        }
+
+        try {
+            $subject = __('Test e-mail Autentik Market');
+            $html = view('mail.templated', [
+                'subject' => $subject,
+                'bodyHtml' => '<p>'.e(__('Dacă primești acest mesaj, trimiterea e-mailurilor funcționează.')).'</p><p>'.e(__('Server: :h, port :p.', ['h' => config('mail.mailers.smtp.host'), 'p' => config('mail.mailers.smtp.port')])).'</p>',
+                'actionUrl' => null,
+                'actionLabel' => null,
+                'lang' => app()->getLocale(),
+            ])->render();
+            Mail::mailer(config('mail.default'))->to($to)->send(new TemplatedMail($subject, $html, app()->getLocale()));
+        } catch (Throwable $e) {
+            report($e);
+
+            return back()->with('error', __('E-mailul de test NU a putut fi trimis.').' '.MailSettings::explain($e));
+        }
+        AuditLogger::log('settings.mail_tested', null, [], ['to' => $to]);
+
+        return back()->with('success', __('E-mailul de test a fost trimis către :e. Verifică inboxul (și folderul Spam).', ['e' => $to]));
     }
 
     public function messages(): View

@@ -3,6 +3,57 @@
         @can('users.manage')<a href="{{ route('crm.users.index') }}" class="btn-ghost">{{ __('Utilizatori & roluri') }}</a>@endcan
         <a href="{{ route('crm.messages.index') }}" class="btn-ghost">{{ __('Mesaje contact') }}</a>
     </x-slot:actions>
+    {{-- E-MAIL (SMTP): configurat din CRM, fără .env --}}
+    <div id="email" class="card card-pad mb-6" x-data="{ enc: @js(old('smtp_encryption', $mail['encryption'])) }">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h2 class="text-xl">{{ __('E-mail (SMTP)') }}</h2>
+                <p class="mt-1 text-sm text-ink-soft">{{ __('Contul de e-mail din care pleacă toate mesajele automate. Datele le găsești în cPanel → Email Accounts → Connect Devices.') }}</p>
+            </div>
+            @if (! $mail['delivers'])
+                <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-800">{{ __('E-mailurile NU se trimit') }}</span>
+            @elseif ($mail['from_crm'])
+                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">{{ __('Configurat din CRM') }}</span>
+            @else
+                <span class="rounded-full bg-sand px-3 py-1 text-xs font-bold text-ink-soft">{{ __('Configurat din .env') }}</span>
+            @endif
+        </div>
+
+        @if (! $mail['delivers'])
+            <p class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{{ __('Aplicația este în modul „:m”: mesajele apar ca trimise în jurnal, dar sunt doar scrise în log și nu ajung la nimeni. Completează datele de mai jos și apasă „Salvează și trimite test”.', ['m' => $mail['mailer']]) }}</p>
+        @endif
+        @if (! $mail['heartbeat'])
+            <p class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{{ __('Cron-ul nu a rulat încă: mesajele automate rămân în coadă (acum: :n) până când adaugi cron-ul în cPanel → Cron Jobs (vezi CRM → Sistem). Testul de mai jos se trimite imediat, fără cron.', ['n' => $mail['queued']]) }}</p>
+        @endif
+
+        <form method="POST" action="{{ route('crm.settings.mail') }}" class="mt-5 grid gap-4 md:grid-cols-2" autocomplete="off">@csrf @method('PUT')
+            <x-input name="smtp_host" :label="__('Server SMTP')" :value="$mail['host']" placeholder="mail.autentikmarket.ro" required />
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="field-label" for="smtp_encryption">{{ __('Criptare') }}</label>
+                    <select id="smtp_encryption" name="smtp_encryption" class="field-input" x-model="enc" @change="$refs.port.value = enc === 'tls' ? 587 : 465">
+                        <option value="ssl">SSL (465)</option>
+                        <option value="tls">TLS / STARTTLS (587)</option>
+                    </select>
+                </div>
+                <x-input name="smtp_port" type="number" :label="__('Port')" :value="$mail['port'] ?: 465" x-ref="port" required />
+            </div>
+            <x-input name="smtp_username" :label="__('Utilizator (adresa de e-mail completă)')" :value="$mail['username']" placeholder="noreply@autentikmarket.ro" />
+            <x-input name="smtp_password" type="password" :label="__('Parola contului de e-mail')" autocomplete="new-password" :placeholder="$mail['has_password'] ? '•••••••• '.__('(salvată — lasă gol ca să o păstrezi)') : ''" />
+            <x-input name="from_address" type="email" :label="__('Adresa „De la”')" :value="$mail['from_address']" :help="__('De regulă aceeași cu utilizatorul; altfel serverul poate refuza mesajele.')" />
+            <x-input name="from_name" :label="__('Numele expeditorului')" :value="$mail['from_name']" placeholder="Autentik Market" />
+            <x-checkbox name="smtp_verify_peer" class="md:col-span-2" :label="__('Verifică certificatul SSL al serverului (recomandat)')" :checked="$mail['verify_peer']" :help="__('Debifează doar dacă testul spune că certificatul nu corespunde numelui serverului.')" />
+            <div class="flex flex-wrap gap-2 md:col-span-2">
+                <button name="action" value="test" class="btn-accent">✉️ {{ __('Salvează și trimite test') }}</button>
+                <button name="action" value="save" class="btn-ghost">{{ __('Doar salvează') }}</button>
+                @if ($mail['from_crm'])
+                    <button name="action" value="clear" formnovalidate class="btn-ghost" onclick="return confirm(@js(__('Ștergi setările SMTP din CRM? Se vor folosi valorile din .env.')))">{{ __('Folosește .env') }}</button>
+                @endif
+            </div>
+            <p class="text-xs text-ink-soft md:col-span-2">{{ __('Testul se trimite imediat la adresa ta (:e) și îți arată exact ce eroare dă serverul, dacă nu merge.', ['e' => auth()->user()->email]) }}</p>
+        </form>
+    </div>
+
     <form method="POST" action="{{ route('crm.settings.update') }}" enctype="multipart/form-data" class="grid gap-6 xl:grid-cols-2">@csrf @method('PUT')
         <div class="card card-pad space-y-4">
             <h2 class="text-xl">{{ __('Integrări') }}</h2>
@@ -44,12 +95,4 @@
         <div class="xl:col-span-2"><button class="btn-primary btn-lg">{{ __('Salvează setările') }}</button></div>
     </form>
 
-    <div class="card card-pad mt-6 max-w-2xl">
-        <h2 class="text-xl">{{ __('Setări e-mail (SMTP)') }}</h2>
-        <p class="mt-1 text-sm text-ink-soft">{{ __('Configurate în fișierul .env (MAIL_*), compatibile cu e-mail cPanel sau SMTP extern.') }}</p>
-        <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
-            @foreach ($mail as $k => $v)<div><dt class="text-xs text-ink-soft">{{ $k }}</dt><dd class="font-mono">{{ $v ?: '—' }}</dd></div>@endforeach
-        </dl>
-        <form method="POST" action="{{ route('crm.settings.test-email') }}" class="mt-4">@csrf<button class="btn-accent">✉️ {{ __('Trimite email test') }}</button></form>
-    </div>
 </x-layouts.crm>

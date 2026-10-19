@@ -8,6 +8,7 @@ use App\Services\Blog\TemplateBlogDraftGenerator;
 use App\Services\Updates\ApplicationRuntime;
 use App\Services\Updates\ArtisanRuntime;
 use App\Support\AppVersion;
+use App\Support\MailSettings;
 use App\Support\Settings;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -41,6 +42,9 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Password::defaults(fn () => Password::min(8)->letters()->numbers());
+
+        // SMTP din CRM (Setări → E-mail), cu prioritate față de MAIL_* din .env.
+        MailSettings::apply();
 
         Paginator::defaultView('components.pagination');
 

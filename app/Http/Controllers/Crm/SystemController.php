@@ -7,6 +7,7 @@ use App\Models\ApplicationUpdate;
 use App\Models\AuditLog;
 use App\Services\AuditLogger;
 use App\Support\AppVersion;
+use App\Support\MailSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -32,6 +33,7 @@ class SystemController extends Controller
                 'Laravel' => app()->version(),
                 __('Bază de date') => DB::connection()->getDriverName().($dbOk ? ' ✓' : ' ✗'),
                 __('Coadă') => config('queue.default'),
+                __('E-mail') => MailSettings::delivers() ? config('mail.default').' · '.config('mail.mailers.smtp.host').' ✓' : config('mail.default').' ✗ '.__('nu se trimite'),
                 'Cache' => config('cache.default'),
                 __('Mediu') => app()->environment(),
                 'Debug' => config('app.debug') ? 'ON ⚠' : 'OFF',

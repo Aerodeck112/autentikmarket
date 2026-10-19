@@ -1,4 +1,12 @@
 <x-layouts.crm :title="__('Dashboard')">
+    @can('settings.manage')
+        @unless (\App\Support\MailSettings::delivers())
+            <a href="{{ route('crm.settings.index') }}#email" class="mb-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900 hover:bg-red-100">
+                <span class="text-lg">✉️</span>
+                <span><strong>{{ __('E-mailurile NU se trimit.') }}</strong> {{ __('SMTP nu este configurat. Configurează-l în Setări → E-mail (SMTP).') }}</span>
+            </a>
+        @endunless
+    @endcan
     @php $e = $s['next_event']; @endphp
     @php $ns = $s['next_stats']; @endphp
     <div class="grid gap-6 xl:grid-cols-3">
