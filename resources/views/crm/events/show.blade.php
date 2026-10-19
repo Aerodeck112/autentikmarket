@@ -14,7 +14,7 @@
             <div class="card card-pad">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <p class="text-sm text-ink-soft">{{ $event->title_hu }}</p>
+                        <p class="text-sm text-ink-soft">@if ($event->edition)<span class="font-semibold text-clay">{{ $event->editionLabel() }}</span> · @endif{{ $event->title_hu }}</p>
                         <p class="mt-1 capitalize">{{ format_date_local($event->event_date, true) }} · {{ $event->timeRange() }} · {{ $event->city }}, {{ $event->venue_name }}</p>
                     </div>
                     <x-status :status="$event->status" />

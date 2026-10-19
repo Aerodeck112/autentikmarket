@@ -20,6 +20,10 @@
                 <x-checkbox name="newsletter" :label="__('Dorește newsletter')" :help="__('Bifează doar dacă persoana a cerut explicit.')" />
                 <x-checkbox name="marketing" :label="__('Acceptă comunicări despre târguri (marketing)')" :help="__('Bifează doar dacă persoana a cerut explicit.')" />
             </div>
+            <div class="card card-pad space-y-3">
+                <h2 class="text-lg">{{ __('Vizită la târg (opțional)') }}</h2>
+                <x-crm.visit-fields :events="$events" :producers="$producers" :participants="$participants" />
+            </div>
             <div class="card card-pad space-y-3" x-show="email" x-cloak>
                 <x-checkbox name="send_invite" :label="__('Trimite invitație pe e-mail')" :checked="old('send_invite', true)" :help="__('Primește, în limba lui, un link să își aleagă parola și să vadă cardul Autentik (valabil 7 zile).')" />
             </div>

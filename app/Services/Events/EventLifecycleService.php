@@ -37,6 +37,7 @@ class EventLifecycleService
         return DB::transaction(function () use ($data, $admin) {
             $event = new Event($data);
             $event->created_by = $admin?->id;
+            $event->edition ??= Event::nextEdition($event->venue_id, $event->city);
             $event->save();
 
             if ($event->venue_id && ($master = $event->venue?->masterLayout)) {

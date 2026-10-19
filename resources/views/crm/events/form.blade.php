@@ -18,6 +18,7 @@
                 <x-input name="venue_name" :label="__('Denumire loc')" :value="$event->venue_name" />
                 <x-input name="address" :label="__('Adresă')" :value="$event->address" />
                 <x-input name="event_date" type="date" :label="__('Data')" :value="$event->event_date?->toDateString()" required />
+                <x-input name="edition" type="number" min="1" :label="__('Ediția nr.')" :value="$event->edition" :help="__('Gol = următorul număr pentru această locație. Corectați dacă târgul a avut ediții înainte de platformă.')" />
                 <div class="grid grid-cols-2 gap-3">
                     <x-input name="start_time" type="time" :label="__('Ora început')" :value="$event->start_time ? substr($event->start_time, 0, 5) : null" />
                     <x-input name="end_time" type="time" :label="__('Ora sfârșit')" :value="$event->end_time ? substr($event->end_time, 0, 5) : null" />

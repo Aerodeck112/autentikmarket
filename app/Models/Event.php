@@ -28,6 +28,7 @@ class Event extends Model
     {
         return [
             'status' => EventStatus::class,
+            'edition' => 'integer',
             'event_date' => 'date',
             'registration_start' => 'datetime',
             'registration_end' => 'datetime',
@@ -110,6 +111,36 @@ class Event extends Model
         }
 
         return true;
+    }
+
+    /** „Ediția a 12-a” (RO) / „12. kiadás” (HU); null dacă ediția nu e numerotată. */
+    public function editionLabel(?string $locale = null): ?string
+    {
+        if (! $this->edition) {
+            return null;
+        }
+        $locale ??= app()->getLocale();
+        if ($locale === 'hu') {
+            return $this->edition.'. kiadás';
+        }
+
+        return $this->edition === 1 ? 'Ediția 1' : 'Ediția a '.$this->edition.'-a';
+    }
+
+    /** Etichetă scurtă pentru liste: „Ed. 12 · Târgu Mureș · 07.11.2026”. */
+    public function shortLabel(): string
+    {
+        return collect([$this->edition ? 'Ed. '.$this->edition : null, $this->localizedCity(), $this->event_date?->format('d.m.Y')])->filter()->implode(' · ');
+    }
+
+    /** Următorul număr de ediție pentru aceeași locație (sau același oraș, fără locație). */
+    public static function nextEdition(?int $venueId, ?string $city): int
+    {
+        $max = static::query()
+            ->when($venueId, fn ($q) => $q->where('venue_id', $venueId), fn ($q) => $q->whereNull('venue_id')->where('city', $city))
+            ->max('edition');
+
+        return ((int) $max) + 1;
     }
 
     public function timeRange(): string

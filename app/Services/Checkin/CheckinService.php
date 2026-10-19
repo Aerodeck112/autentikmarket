@@ -37,7 +37,11 @@ class CheckinService
         return strlen($input) >= 20 ? User::where('card_token', $input)->first() : null;
     }
 
-    public function checkIn(Event $event, User $user, ?User $operator = null, string $method = 'qr'): CheckinResult
+    /**
+     * @param  string  $method  qr | manual | crm (vizită înregistrată ulterior de organizator)
+     * @param  \DateTimeInterface|null  $at  momentul vizitei (implicit acum; din CRM = ziua ediției)
+     */
+    public function checkIn(Event $event, User $user, ?User $operator = null, string $method = 'qr', ?\DateTimeInterface $at = null): CheckinResult
     {
         if (in_array($event->status, [EventStatus::Draft, EventStatus::Cancelled], true)) {
             throw new BusinessRuleException(__('Check-in-ul nu este disponibil pentru acest eveniment.'), 'event_not_active');
@@ -56,8 +60,8 @@ class CheckinService
                 'event_id' => $event->id,
                 'user_id' => $user->id,
                 'operator_id' => $operator?->id,
-                'method' => in_array($method, ['qr', 'manual'], true) ? $method : 'manual',
-                'checked_in_at' => now(),
+                'method' => in_array($method, ['qr', 'manual', 'crm'], true) ? $method : 'manual',
+                'checked_in_at' => $at ?? now(),
             ]));
         } catch (UniqueConstraintViolationException) {
             // Două scanări simultane: constraint-ul DB a blocat dublura.
@@ -66,7 +70,7 @@ class CheckinService
             return new CheckinResult($existing, false, $user->checkins()->count(), collect());
         }
 
-        if ($method === 'manual') {
+        if ($method !== 'qr') {
             AuditLogger::log('checkin.manual', $checkin, [], ['user_id' => $user->id, 'event_id' => $event->id], $operator?->id);
         }
 

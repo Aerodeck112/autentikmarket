@@ -27,9 +27,13 @@ class InteractionService
             ->first();
     }
 
-    public function record(Event $event, Producer $producer, User $user, string $source): ProducerCustomerInteraction
+    /**
+     * @param  bool  $requireParticipation  false doar pentru înregistrarea făcută de organizator din CRM
+     *                                      (ediții dinaintea platformei, producători fără înscriere online)
+     */
+    public function record(Event $event, Producer $producer, User $user, string $source, bool $requireParticipation = true): ProducerCustomerInteraction
     {
-        $participates = $event->registrations()
+        $participates = ! $requireParticipation || $event->registrations()
             ->where('producer_id', $producer->id)
             ->where('status', RegistrationStatus::Approved->value)
             ->exists();

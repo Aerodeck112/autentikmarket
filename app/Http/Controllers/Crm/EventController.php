@@ -49,6 +49,9 @@ class EventController extends Controller
             $data['cover_path'] = Uploads::storeImage($request->file('cover'), 'events');
         }
         unset($data['cover']);
+        if (empty($data['edition'])) {
+            unset($data['edition']); // se numerotează automat
+        }
         $event = $this->lifecycle->create($data, $request->user());
         Cache::forget('home.v1.ro');
         Cache::forget('home.v1.hu');
@@ -83,6 +86,7 @@ class EventController extends Controller
             $data['cover_path'] = Uploads::storeImage($request->file('cover'), 'events');
         }
         unset($data['cover']);
+        $data['edition'] ??= $event->edition ?? Event::nextEdition($data['venue_id'] ?? $event->venue_id, $data['city'] ?? $event->city);
         $dateChanged = $data['event_date'] !== $event->event_date->toDateString();
         $event->update($data);
         if ($dateChanged) {
@@ -205,6 +209,7 @@ class EventController extends Controller
             'registration_start' => ['nullable', 'date'],
             'registration_end' => ['nullable', 'date', 'after_or_equal:registration_start'],
             'max_producers' => ['nullable', 'integer', 'min:1', 'max:1000'],
+            'edition' => ['nullable', 'integer', 'min:1', 'max:9999'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.config('autentik.uploads.image_max_kb')],
         ]);
     }

@@ -4,11 +4,18 @@ namespace App\Http\Controllers\Crm;
 
 use App\Enums\ConsentType;
 use App\Enums\Language;
+use App\Enums\RegistrationStatus;
+use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\Controller;
 use App\Models\Consent;
+use App\Models\Event;
+use App\Models\EventRegistration;
+use App\Models\Producer;
 use App\Models\User;
 use App\Services\Accounts\InvitationService;
 use App\Services\AuditLogger;
+use App\Services\Checkin\CheckinService;
+use App\Services\Checkin\InteractionService;
 use App\Services\Export\TableExporter;
 use App\Services\Search\GlobalSearch;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,6 +47,7 @@ class VisitorController extends Controller
             ->when($filter === 'new', fn ($x) => $x->where('created_at', '>=', now()->subDays(30)))
             ->when($filter === 'returning', fn ($x) => $x->has('checkins', '>=', 2))
             ->when($request->input('city'), fn ($x, $c) => $x->where('city', $c))
+            ->when($request->integer('event'), fn ($x, $e) => $x->whereHas('checkins', fn ($c) => $c->where('event_id', $e)))
             ->when($q, fn ($x) => $x->where(fn ($w) => $w->where('users.first_name', 'like', "%{$q}%")->orWhere('users.last_name', 'like', "%{$q}%")
                 ->orWhere('email', 'like', "%{$q}%")->orWhere('phone', 'like', "%{$q}%")->orWhere('member_code', 'like', "%{$q}%")
                 ->orWhereRaw(GlobalSearch::fullNameSql().' like ?', ["%{$q}%"])
@@ -59,7 +67,12 @@ class VisitorController extends Controller
         $base = User::whereDoesntHave('roles', fn ($r) => $r->whereIn('name', ['producer', 'staff', 'organizer', 'admin', 'super_admin']))->whereNull('anonymized_at');
 
         return view('crm.visitors.index', [
-            'visitors' => $query->paginate(30)->withQueryString(),
+            'visitors' => tap($query->paginate(30)->withQueryString(), fn ($page) => $page->getCollection()->load([
+                'checkins' => fn ($c) => $c->orderBy('checked_in_at'),
+                'checkins.event:id,edition,city,event_date,venue_id', 'checkins.event.venue:id,code',
+                'interactions.producer:id,brand_name',
+            ])),
+            'events' => $this->eventOptions(),
             'filter' => $request->input('filter', 'all'),
             'sort' => $sort,
             'counts' => [
@@ -72,15 +85,16 @@ class VisitorController extends Controller
 
     public function export(Request $request, TableExporter $exporter): StreamedResponse
     {
-        $rows = $this->query($request)->orderBy('users.id')->lazy(500)->map(fn (User $u) => [
-            $u->first_name, $u->last_name, $u->email, $u->phone, $u->city, strtoupper($u->preferredLanguage()->value), $u->member_code,
-            $u->checkins_count, $u->last_visit, $u->rewards_count, $u->raffle_entries_count, $u->reviews_count,
-            $u->newsletter ? 1 : 0, $u->marketing_consent ? 1 : 0, $u->created_at->format('Y-m-d'),
-        ]);
+        $rows = $this->query($request)->with(['checkins.event:id,edition,city,event_date,venue_id', 'checkins.event.venue:id,code', 'interactions.producer:id,brand_name'])
+            ->orderBy('users.id')->lazy(500)->map(fn (User $u) => [
+                $u->first_name, $u->last_name, $u->email, $u->phone, $u->city, strtoupper($u->preferredLanguage()->value), $u->member_code,
+                $u->checkins_count, $u->last_visit, self::editionsText($u), self::producersText($u), $u->rewards_count, $u->raffle_entries_count, $u->reviews_count,
+                $u->newsletter ? 1 : 0, $u->marketing_consent ? 1 : 0, $u->created_at->format('Y-m-d'),
+            ]);
 
         return $exporter->download('vizitatori-'.now()->format('Ymd'), [
             __('Prenume'), __('Nume'), 'E-mail', __('Telefon'), __('Localitate'), __('Limbă'), __('Cod membru'),
-            __('Vizite'), __('Ultima vizită'), __('Recompense'), __('Tombole'), __('Recenzii'), 'Newsletter', 'Marketing', __('Data înscrierii'),
+            __('Vizite'), __('Ultima vizită'), __('Ediții'), __('A cumpărat de la'), __('Recompense'), __('Tombole'), __('Recenzii'), 'Newsletter', 'Marketing', __('Data înscrierii'),
         ], $rows, $request->input('format', 'csv'));
     }
 
@@ -96,6 +110,9 @@ class VisitorController extends Controller
             'wins' => $user->raffleWins()->with(['raffle', 'prize'])->get(),
             'reviews' => $user->reviews()->with('producer')->latest('id')->get(),
             'interactions' => $user->interactions()->with(['producer', 'event'])->latest('id')->get(),
+            'events' => $this->eventOptions(),
+            'producers' => $this->producerOptions(),
+            'participants' => $this->participantsMap(),
             'consents' => $user->consents()->latest('id')->get(),
             'messages' => $user->notificationLogs()->latest('id')->limit(20)->get(),
         ]);
@@ -104,7 +121,11 @@ class VisitorController extends Controller
     /** Cumpărător adăugat de organizator (ex. la intrarea în târg, fără telefon inteligent). */
     public function create(): View
     {
-        return view('crm.visitors.create');
+        return view('crm.visitors.create', [
+            'events' => $this->eventOptions(),
+            'producers' => $this->producerOptions(),
+            'participants' => $this->participantsMap(),
+        ]);
     }
 
     public function store(Request $request, InvitationService $invitations): RedirectResponse
@@ -120,6 +141,7 @@ class VisitorController extends Controller
             'newsletter' => ['nullable', 'boolean'],
             'marketing' => ['nullable', 'boolean'],
             'send_invite' => ['nullable', 'boolean'],
+            ...self::visitRules(false),
         ], [
             'phone.required_without' => __('Completează cel puțin e-mailul sau telefonul.'),
             'email.unique' => __('Există deja un cont cu acest e-mail. Caută-l în listă.'),
@@ -166,9 +188,10 @@ class VisitorController extends Controller
         AuditLogger::log('visitor.created_by_admin', $user, [], ['email' => (bool) $user->email]);
 
         $invited = $request->boolean('send_invite') && $invitations->send($user);
+        $visitNote = $request->filled('event_id') ? ' '.$this->recordVisit($user, Event::findOrFail($request->integer('event_id')), (array) $request->input('producer_ids', []), $request->user()) : '';
 
         return redirect()->route('crm.visitors.show', $user)->with('success', __('Cumpărătorul :n a fost adăugat (cod :c).', ['n' => $user->name, 'c' => $user->member_code])
-            .($invited ? ' '.__('Invitația a fost trimisă la :e.', ['e' => $user->email]) : ''));
+            .($invited ? ' '.__('Invitația a fost trimisă la :e.', ['e' => $user->email]) : '').$visitNote);
     }
 
     public function invite(User $user, InvitationService $invitations): RedirectResponse
@@ -205,5 +228,96 @@ class VisitorController extends Controller
         AuditLogger::log('visitor.updated', $user, $old, $data);
 
         return back()->with('success', __('Cumpărătorul a fost actualizat.'));
+    }
+
+    /** „Înregistrează vizită la târg”: ediția la care a fost + producătorii de la care a cumpărat. */
+    public function storeVisit(Request $request, User $user): RedirectResponse
+    {
+        $request->validate(self::visitRules(true));
+
+        return back()->with('success', $this->recordVisit($user, Event::findOrFail($request->integer('event_id')), (array) $request->input('producer_ids', []), $request->user()));
+    }
+
+    protected static function visitRules(bool $eventRequired): array
+    {
+        return [
+            'event_id' => [$eventRequired ? 'required' : 'nullable', 'integer', Rule::exists('events', 'id')->whereNotIn('status', ['draft', 'cancelled'])],
+            'producer_ids' => ['nullable', 'array', 'max:100'],
+            'producer_ids.*' => ['integer', 'exists:producers,id'],
+        ];
+    }
+
+    /** Vizita contează ca un check-in (fidelitate, statistici); cumpărăturile ca interacțiuni (recenzii). */
+    protected function recordVisit(User $user, Event $event, array $producerIds, User $admin): string
+    {
+        $at = $event->event_date->copy()->setTimeFromTimeString($event->start_time ?: '10:00');
+        $at = $at->isFuture() ? now() : $at;
+        try {
+            $result = app(CheckinService::class)->checkIn($event, $user, $admin, 'crm', $at);
+        } catch (BusinessRuleException $e) {
+            return $e->getMessage();
+        }
+
+        $added = 0;
+        foreach (Producer::whereIn('id', $producerIds)->get() as $producer) {
+            try {
+                $interaction = app(InteractionService::class)->record($event, $producer, $user, 'crm', false);
+                $added += (int) $interaction->wasRecentlyCreated;
+            } catch (BusinessRuleException) {
+                // ex. propriul stand: ignorat
+            }
+        }
+
+        $parts = [$result->created
+            ? __('Vizita la :e a fost înregistrată (total vizite: :n).', ['e' => $event->shortLabel(), 'n' => $result->visits])
+            : __('Vizita la :e era deja înregistrată.', ['e' => $event->shortLabel()])];
+        if ($added) {
+            $parts[] = __('Cumpărături adăugate: :n.', ['n' => $added]);
+        }
+        foreach ($result->newRewards as $reward) {
+            $parts[] = __('Recompensă nouă: :r.', ['r' => $reward->rule?->title_ro]);
+        }
+
+        return implode(' ', $parts);
+    }
+
+    /** Edițiile (fără ciorne și anulate), cele mai recente primele. */
+    protected function eventOptions(): array
+    {
+        return Event::whereNotIn('status', ['draft', 'cancelled'])->orderByDesc('event_date')->limit(200)->get()
+            ->mapWithKeys(fn (Event $e) => [$e->id => $e->shortLabel()])->all();
+    }
+
+    protected function producerOptions(): array
+    {
+        return Producer::approved()->orderBy('brand_name')->pluck('brand_name', 'id')->all();
+    }
+
+    /** event_id → producătorii aprobați la acea ediție (evidențiați în formular). */
+    protected function participantsMap(): array
+    {
+        return EventRegistration::where('status', RegistrationStatus::Approved->value)
+            ->get(['event_id', 'producer_id'])->groupBy('event_id')
+            ->map(fn ($rows) => $rows->pluck('producer_id')->values())->all();
+    }
+
+    public static function editionsText(User $u): string
+    {
+        return $u->checkins->sortBy('checked_in_at')->map(fn ($c) => self::editionTag($c->event))->filter()->implode(', ');
+    }
+
+    public static function editionTag(?Event $e): ?string
+    {
+        if (! $e) {
+            return null;
+        }
+        $place = $e->venue?->code ?: mb_substr((string) $e->city, 0, 3);
+
+        return trim($place.' '.($e->edition ? 'ed. '.$e->edition : $e->event_date?->format('d.m.Y')));
+    }
+
+    public static function producersText(User $u): string
+    {
+        return $u->interactions->pluck('producer.brand_name')->filter()->unique()->sort()->implode(', ');
     }
 }

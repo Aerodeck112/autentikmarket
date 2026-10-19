@@ -10,6 +10,7 @@
             <a href="{{ lroute('events.index') }}" class="text-sm text-cream/70 hover:text-white">← {{ __('Calendarul târgurilor') }}</a>
             <div class="mt-6 flex flex-wrap items-center gap-3">
                 <x-status :status="$event->status" />
+                @if ($event->edition)<span class="rounded-full border border-cream/25 px-3 py-0.5 text-xs font-semibold uppercase tracking-wider text-wheat">{{ $event->editionLabel() }}</span>@endif
             </div>
             <h1 class="mt-4 max-w-3xl text-5xl leading-tight sm:text-6xl">{{ $event->t('title') }}</h1>
             <div class="mt-6 grid max-w-3xl gap-4 text-cream/85 sm:grid-cols-3">

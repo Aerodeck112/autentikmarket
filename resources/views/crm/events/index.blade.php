@@ -14,7 +14,7 @@
             <tbody>
             @forelse ($events as $event)
                 <tr>
-                    <td><a href="{{ route('crm.events.show', $event) }}" class="font-medium hover:text-clay">{{ $event->title_ro }}</a><p class="text-xs text-ink-soft">{{ $event->title_hu }}</p></td>
+                    <td><a href="{{ route('crm.events.show', $event) }}" class="font-medium hover:text-clay">{{ $event->title_ro }}</a><p class="text-xs text-ink-soft">@if ($event->edition)<span class="font-semibold text-clay">{{ $event->editionLabel('ro') }}</span> · @endif{{ $event->title_hu }}</p></td>
                     <td class="whitespace-nowrap">{{ $event->event_date->format('d.m.Y') }}</td>
                     <td>{{ $event->city }}</td>
                     <td><x-status :status="$event->status" /></td>

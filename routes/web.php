@@ -256,6 +256,7 @@ Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->grou
         Route::get('/visitors/export', [Crm\VisitorController::class, 'export'])->middleware('can:exports.run')->name('visitors.export');
         Route::get('/visitors/create', [Crm\VisitorController::class, 'create'])->middleware('can:visitors.manage')->name('visitors.create');
         Route::post('/visitors', [Crm\VisitorController::class, 'store'])->middleware('can:visitors.manage')->name('visitors.store');
+        Route::post('/visitors/{user}/visits', [Crm\VisitorController::class, 'storeVisit'])->middleware('can:visitors.manage')->name('visitors.visits.store');
         Route::post('/visitors/{user}/invite', [Crm\VisitorController::class, 'invite'])->middleware(['can:visitors.manage', 'throttle:forms'])->name('visitors.invite');
         Route::get('/visitors/{user}', [Crm\VisitorController::class, 'show'])->name('visitors.show');
         Route::put('/visitors/{user}', [Crm\VisitorController::class, 'update'])->middleware('can:visitors.manage')->name('visitors.update');
