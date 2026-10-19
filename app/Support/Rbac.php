@@ -52,7 +52,7 @@ class Rbac
             'staff' => ['checkin.perform', 'rewards.redeem', 'raffles.validate', 'producers.view', 'visitors.view'],
             'organizer' => [
                 'crm.access', 'dashboard.view', 'events.view', 'events.manage', 'maps.manage', 'reservations.manage',
-                'producers.view', 'producers.manage', 'producers.approve', 'visitors.view', 'checkin.perform',
+                'producers.view', 'producers.manage', 'producers.approve', 'visitors.view', 'visitors.manage', 'checkin.perform',
                 'rewards.redeem', 'raffles.manage', 'raffles.validate', 'reviews.moderate', 'contracts.manage',
                 'tasks.view', 'tasks.manage', 'blog.manage', 'reports.view', 'exports.run',
             ],

@@ -52,6 +52,20 @@ class NotificationTemplateSeeder extends Seeder
                 'body_ro' => "Bună, {{name}}!\n\nAm primit o cerere de resetare a parolei pentru contul tău. Linkul este valabil 60 de minute.\n\nDacă nu tu ai făcut cererea, poți ignora acest mesaj.",
                 'body_hu' => "Szia, {{name}}!\n\nJelszó-visszaállítási kérést kaptunk a fiókodhoz. A link 60 percig érvényes.\n\nHa nem te kérted, nyugodtan figyelmen kívül hagyhatod ezt az üzenetet.",
             ],
+            'ACCOUNT_INVITE' => [
+                'description' => 'Invitație cont cumpărător (adăugat de organizator în CRM)',
+                'subject_ro' => 'Cardul tău Autentik te așteaptă',
+                'subject_hu' => 'Vár az Autentik kártyád',
+                'body_ro' => "Bună, {{name}}!\n\nTe-am înscris în comunitatea Autentik Market. Codul tău de membru este {{member_code}}.\n\nApasă butonul de mai jos ca să îți alegi parola și să vezi cardul Autentik în telefon. Cu el strângi vizite la târg și primești cadouri.\n\nLinkul este valabil 7 zile.",
+                'body_hu' => "Szia, {{name}}!\n\nFelvettünk az Autentik Market közösségébe. A tagkódod: {{member_code}}.\n\nAz alábbi gombbal választhatsz jelszót, és megnézheted az Autentik kártyádat a telefonodon. Vele gyűjtheted a vásárlátogatásokat, és ajándékokat kapsz.\n\nA link 7 napig érvényes.",
+            ],
+            'PRODUCER_INVITE' => [
+                'description' => 'Invitație cont producător (adăugat de organizator în CRM)',
+                'subject_ro' => 'Contul tău de producător Autentik Market',
+                'subject_hu' => 'Autentik Market termelői fiókod',
+                'body_ro' => "Bună, {{name}}!\n\nAm creat pentru {{producer_name}} un cont de producător pe platforma Autentik Market.\n\nApasă butonul de mai jos ca să îți alegi parola. Din cont îți completezi profilul, încarci documentele și rezervi standul la târguri.\n\nLinkul este valabil 7 zile.",
+                'body_hu' => "Szia, {{name}}!\n\nTermelői fiókot hoztunk létre a(z) {{producer_name}} számára az Autentik Market platformon.\n\nAz alábbi gombbal választhatsz jelszót. A fiókban kitöltheted a profilodat, feltöltheted a dokumentumokat, és standot foglalhatsz a vásárokra.\n\nA link 7 napig érvényes.",
+            ],
             'NEWSLETTER_CONFIRM' => [
                 'description' => 'Confirmare abonare newsletter (double opt-in)',
                 'subject_ro' => 'Confirmă abonarea la newsletter',

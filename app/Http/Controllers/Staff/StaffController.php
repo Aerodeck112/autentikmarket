@@ -110,7 +110,8 @@ class StaffController extends Controller
         $users = User::query()->whereNull('anonymized_at')
             ->where(fn ($w) => $w->where('member_code', 'like', $like)->orWhere('email', 'like', $like)->orWhere('phone', 'like', $like)
                 ->orWhere('last_name', 'like', $like)->orWhere('first_name', 'like', $like)
-                ->orWhereRaw(GlobalSearch::fullNameSql().' like ?', [$like]))
+                ->orWhereRaw(GlobalSearch::fullNameSql().' like ?', [$like])
+                ->tap(fn ($w) => GlobalSearch::orWherePhoneDigits($w, $q)))
             ->withCount('checkins')->limit(15)->get();
 
         return response()->json(['results' => $users->map(fn (User $u) => [

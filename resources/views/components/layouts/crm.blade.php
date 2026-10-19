@@ -19,7 +19,7 @@
         [__('Evenimente'), 'crm.events.index', 'events.view', 'M8 7V3m8 4V3M4 11h16M5 5h14v16H5z'],
         [__('Hartă & standuri'), 'crm.venues.index', 'maps.manage', 'M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zm0 0v14m6-12v14'],
         [__('Producători'), 'crm.producers.index', 'producers.view', 'M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6'],
-        [__('Vizitatori'), 'crm.visitors.index', 'visitors.view', 'M17 20h5v-2a4 4 0 00-5-3.9M9 20H2v-2a4 4 0 014-4h3a4 4 0 014 4v2zm3-12a4 4 0 11-8 0 4 4 0 018 0zm7 1a3 3 0 11-6 0 3 3 0 016 0z'],
+        [__('Cumpărători'), 'crm.visitors.index', 'visitors.view', 'M17 20h5v-2a4 4 0 00-5-3.9M9 20H2v-2a4 4 0 014-4h3a4 4 0 014 4v2zm3-12a4 4 0 11-8 0 4 4 0 018 0zm7 1a3 3 0 11-6 0 3 3 0 016 0z'],
         [__('Check-in'), 'crm.checkins.index', 'checkin.perform', 'M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M9 12l2 2 4-4'],
         [__('Fidelitate'), 'crm.loyalty.index', 'loyalty.manage', 'M12 21l-8-8a5 5 0 017-7l1 1 1-1a5 5 0 017 7z'],
         [__('Tombole'), 'crm.raffles.index', 'raffles.manage', 'M20 12v8H4v-8M2 7h20v5H2zM12 22V7'],

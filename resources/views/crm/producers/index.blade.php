@@ -1,5 +1,6 @@
 <x-layouts.crm :title="__('Producători')">
     <x-slot:actions>
+        @can('producers.manage')<a href="{{ route('crm.producers.create') }}" class="btn-primary">+ {{ __('Producător nou') }}</a>@endcan
         @can('producers.manage')<a href="{{ route('crm.categories.index') }}" class="btn-ghost">{{ __('Categorii') }}</a>@endcan
         @can('exports.run')
             <a href="{{ route('crm.producers.export', request()->query()) }}" class="btn-ghost">CSV</a>

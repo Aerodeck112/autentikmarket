@@ -12,12 +12,16 @@ use App\Models\EventRegistration;
 use App\Models\Producer;
 use App\Models\ProducerCategory;
 use App\Models\ProducerDocument;
+use App\Models\User;
+use App\Services\Accounts\InvitationService;
 use App\Services\AuditLogger;
 use App\Services\Export\TableExporter;
 use App\Services\Producers\ProducerWorkflow;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -98,14 +102,10 @@ class ProducerController extends Controller
         ]);
     }
 
-    public function edit(Producer $producer): View
+    /** Câmpurile fișei de producător (aceleași la adăugare și la editare). */
+    protected function rules(): array
     {
-        return view('crm.producers.edit', ['producer' => $producer, 'categories' => ProducerCategory::orderBy('sort_order')->get()]);
-    }
-
-    public function update(Request $request, Producer $producer): RedirectResponse
-    {
-        $data = $request->validate([
+        return [
             'brand_name' => ['required', 'string', 'max:150'],
             'legal_name' => ['nullable', 'string', 'max:200'],
             'cui' => ['nullable', 'string', 'max:30'],
@@ -133,7 +133,123 @@ class ProducerController extends Controller
             'shop_url' => ['nullable', 'url', 'max:255'],
             'is_public' => ['nullable', 'boolean'],
             'internal_notes' => ['nullable', 'string', 'max:5000'],
+        ];
+    }
+
+    /** Producător adăugat de organizator (ex. după o discuție la târg). */
+    public function create(): View
+    {
+        return view('crm.producers.create', ['producer' => new Producer(['preferred_language' => 'ro', 'is_public' => true]), 'categories' => ProducerCategory::orderBy('sort_order')->get()]);
+    }
+
+    public function store(Request $request, InvitationService $invitations): RedirectResponse
+    {
+        $rules = array_merge($this->rules(), [
+            'create_account' => ['nullable', 'boolean'],
+            'contact_first_name' => ['nullable', 'required_if:create_account,1', 'string', 'max:100'],
+            'contact_last_name' => ['nullable', 'required_if:create_account,1', 'string', 'max:100'],
+            'approve' => ['nullable', 'boolean'],
         ]);
+        if ($request->boolean('create_account')) {
+            $rules['email'] = ['required', 'email', 'max:255'];
+        }
+        $data = $request->validate($rules, [
+            'email.required' => __('Pentru cont este nevoie de adresa de e-mail a producătorului.'),
+        ]);
+        $withAccount = $request->boolean('create_account');
+        $email = isset($data['email']) ? strtolower($data['email']) : null;
+        $existing = $withAccount && $email ? User::where('email', $email)->first() : null;
+        if ($existing?->producer) {
+            return back()->withInput()->withErrors(['email' => __('Contul cu acest e-mail aparține deja producătorului :p.', ['p' => $existing->producer->brand_name])]);
+        }
+
+        [$producer, $user, $isNewUser] = DB::transaction(function () use ($data, $request, $withAccount, $email, $existing) {
+            $user = null;
+            $isNewUser = false;
+            if ($withAccount) {
+                $user = $existing ?? User::create([
+                    'first_name' => $data['contact_first_name'],
+                    'last_name' => $data['contact_last_name'],
+                    'email' => $email,
+                    'phone' => $data['phone'] ?? null,
+                    'city' => $data['city'] ?? null,
+                    'preferred_language' => $data['preferred_language'],
+                    // Parolă aleatorie, necunoscută: persoana își alege parola din linkul de invitație.
+                    'password' => Str::random(48),
+                ]);
+                $isNewUser = ! $existing;
+                $user->assignRole('producer');
+            }
+            $fields = collect($data)->except(['create_account', 'contact_first_name', 'contact_last_name', 'approve'])->all();
+            $producer = new Producer($fields + ['user_id' => $user?->id]);
+            $producer->email = $email ?? ($data['email'] ?? null);
+            $producer->representative_name ??= $user?->name;
+            $producer->is_public = $request->boolean('is_public');
+            $producer->save();
+
+            return [$producer, $user, $isNewUser];
+        });
+        AuditLogger::log('producer.created_by_admin', $producer, [], ['account' => (bool) $user, 'linked_existing' => (bool) $existing]);
+
+        if ($request->boolean('approve') && $request->user()->can('producers.approve')) {
+            $this->workflow->changeStatus($producer->fresh(), ProducerStatus::Approved, $request->user(), __('Adăugat și aprobat de organizator.'));
+        }
+        $invited = $isNewUser && $invitations->send($user, $producer);
+
+        $message = __('Producătorul :p a fost adăugat.', ['p' => $producer->brand_name]);
+        if ($invited) {
+            $message .= ' '.__('Invitația de creare a parolei a fost trimisă la :e.', ['e' => $user->email]);
+        } elseif ($existing) {
+            $message .= ' '.__('A fost legat de contul existent :e.', ['e' => $existing->email]);
+        }
+
+        return redirect()->route('crm.producers.show', $producer)->with('success', $message);
+    }
+
+    /** Cont pentru un producător fără cont, sau retrimiterea invitației dacă nu a intrat niciodată. */
+    public function invite(Request $request, Producer $producer, InvitationService $invitations): RedirectResponse
+    {
+        $user = $producer->user;
+        if ($user && $user->last_login_at) {
+            return back()->with('error', __('Producătorul are deja cont activ. Dacă și-a uitat parola, o poate reseta de pe pagina de autentificare.'));
+        }
+        if (! $user) {
+            $data = $request->validate([
+                'contact_first_name' => ['required', 'string', 'max:100'],
+                'contact_last_name' => ['required', 'string', 'max:100'],
+            ]);
+            $email = strtolower((string) $producer->email);
+            if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                return back()->with('error', __('Completează întâi adresa de e-mail în fișa producătorului.'));
+            }
+            if (User::where('email', $email)->exists()) {
+                return back()->with('error', __('Există deja un cont cu adresa :e. Leagă producătorul de el din „Producător nou” sau folosește altă adresă.', ['e' => $email]));
+            }
+            $user = DB::transaction(function () use ($producer, $data, $email) {
+                $user = User::create([
+                    'first_name' => $data['contact_first_name'], 'last_name' => $data['contact_last_name'],
+                    'email' => $email, 'phone' => $producer->phone, 'city' => $producer->city,
+                    'preferred_language' => $producer->preferredLanguage()->value, 'password' => Str::random(48),
+                ]);
+                $user->assignRole('producer');
+                $producer->update(['user_id' => $user->id]);
+
+                return $user;
+            });
+        }
+        $invitations->send($user, $producer);
+
+        return back()->with('success', __('Invitația de creare a parolei a fost trimisă la :e.', ['e' => $user->email]));
+    }
+
+    public function edit(Producer $producer): View
+    {
+        return view('crm.producers.edit', ['producer' => $producer, 'categories' => ProducerCategory::orderBy('sort_order')->get()]);
+    }
+
+    public function update(Request $request, Producer $producer): RedirectResponse
+    {
+        $data = $request->validate($this->rules());
         $data['is_public'] = $request->boolean('is_public');
         $old = $producer->only(['preferred_language', 'brand_name', 'shop_url']);
         if ($data['brand_name'] !== $producer->brand_name) {

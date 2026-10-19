@@ -27,7 +27,8 @@ class GlobalSearch
             $results['visitors'] = User::query()
                 ->where(fn ($q) => $q->where('users.first_name', 'like', $like)->orWhere('users.last_name', 'like', $like)
                     ->orWhere('email', 'like', $like)->orWhere('phone', 'like', $like)->orWhere('member_code', 'like', $like)
-                    ->orWhereRaw(self::fullNameSql().' like ?', [$like]))
+                    ->orWhereRaw(self::fullNameSql().' like ?', [$like])
+                    ->tap(fn ($w) => self::orWherePhoneDigits($w, $term)))
                 ->limit($limit)->get();
         }
         if ($actor->hasPermission('producers.view')) {
@@ -55,6 +56,20 @@ class GlobalSearch
         }
 
         return array_filter($results, fn ($c) => $c->isNotEmpty());
+    }
+
+    /**
+     * Telefonul indiferent de formatare: „0741111222” găsește „0741 111 222” sau „0741-111-222”.
+     * Doar când termenul are cel puțin 4 cifre (altfel nu adaugă nimic).
+     */
+    public static function orWherePhoneDigits($query, string $term, string $table = 'users')
+    {
+        $digits = preg_replace('/\D/', '', $term);
+        if (strlen($digits) < 4) {
+            return $query;
+        }
+
+        return $query->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE({$table}.phone, ' ', ''), '-', ''), '.', ''), '(', ''), ')', ''), '+', '') like ?", ['%'.$digits.'%']);
     }
 
     /** Concatenare portabilă (MySQL/MariaDB: CONCAT; SQLite: ||). */

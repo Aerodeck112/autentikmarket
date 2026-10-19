@@ -16,6 +16,24 @@
                 </dl>
                 @if ($missing)<p class="mt-4 rounded-xl bg-amber-50 p-3 text-xs text-amber-900">{{ __('Câmpuri lipsă') }}: {{ implode(', ', $missing) }}</p>@endif
                 @if ($producer->internal_notes)<p class="mt-4 rounded-xl bg-cream p-3 text-sm"><strong>{{ __('Note interne') }}:</strong> {{ $producer->internal_notes }}</p>@endif
+                @can('producers.manage')
+                    @if (! $producer->user)
+                        <form method="POST" action="{{ route('crm.producers.invite', $producer) }}" class="mt-4 rounded-xl border border-line p-4">@csrf
+                            <p class="text-sm font-semibold">{{ __('Producătorul nu are cont pe platformă.') }}</p>
+                            <p class="mt-1 text-xs text-ink-soft">{{ __('Creează-i cont: primește la :e un link să își aleagă parola.', ['e' => $producer->email ?: __('adresa din fișă')]) }}</p>
+                            <div class="mt-3 flex flex-wrap items-end gap-2">
+                                <x-input name="contact_first_name" :label="__('Prenume')" class="w-40" required />
+                                <x-input name="contact_last_name" :label="__('Nume')" class="w-40" required />
+                                <button class="btn-accent btn-sm">{{ __('Creează cont și trimite invitația') }}</button>
+                            </div>
+                        </form>
+                    @elseif (! $producer->user->last_login_at)
+                        <form method="POST" action="{{ route('crm.producers.invite', $producer) }}" class="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-line p-4 text-sm">@csrf
+                            <span>{{ __('Contul :e nu a fost activat încă.', ['e' => $producer->user->email]) }}</span>
+                            <button class="btn-ghost btn-sm">{{ __('Retrimite invitația') }}</button>
+                        </form>
+                    @endif
+                @endcan
             </div>
 
             {{-- VERIFICARE --}}

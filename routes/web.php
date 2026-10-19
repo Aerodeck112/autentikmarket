@@ -70,6 +70,9 @@ foreach (Locales::supported() as $locale) {
 Route::get('/reset-password/{token}', [Auth\PasswordController::class, 'reset'])->middleware('guest')->name('password.reset');
 Route::post('/reset-password', [Auth\PasswordController::class, 'update'])->middleware(['guest', 'throttle:forms'])->name('password.update');
 Route::post('/logout', [Auth\LoginController::class, 'destroy'])->middleware('auth')->name('logout');
+// Invitație din CRM (cumpărător / producător adăugat de organizator): URL semnat, 7 zile, o singură folosire.
+Route::get('/invite/{user}', [Auth\InvitationController::class, 'show'])->middleware(['signed', 'throttle:forms'])->name('invite.show');
+Route::post('/invite/{user}', [Auth\InvitationController::class, 'accept'])->middleware(['signed', 'throttle:forms'])->name('invite.accept');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', Auth\DashboardRedirectController::class)->name('dashboard.redirect');
@@ -234,6 +237,9 @@ Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->grou
     Route::middleware('can:producers.view')->group(function () {
         Route::get('/producers', [Crm\ProducerController::class, 'index'])->name('producers.index');
         Route::get('/producers/export', [Crm\ProducerController::class, 'export'])->middleware('can:exports.run')->name('producers.export');
+        Route::get('/producers/create', [Crm\ProducerController::class, 'create'])->middleware('can:producers.manage')->name('producers.create');
+        Route::post('/producers', [Crm\ProducerController::class, 'store'])->middleware('can:producers.manage')->name('producers.store');
+        Route::post('/producers/{producer}/invite', [Crm\ProducerController::class, 'invite'])->middleware(['can:producers.manage', 'throttle:forms'])->name('producers.invite');
         Route::get('/producers/{producer}', [Crm\ProducerController::class, 'show'])->name('producers.show');
         Route::get('/producers/{producer}/edit', [Crm\ProducerController::class, 'edit'])->middleware('can:producers.manage')->name('producers.edit');
         Route::put('/producers/{producer}', [Crm\ProducerController::class, 'update'])->middleware('can:producers.manage')->name('producers.update');
@@ -248,6 +254,9 @@ Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->grou
     Route::middleware('can:visitors.view')->group(function () {
         Route::get('/visitors', [Crm\VisitorController::class, 'index'])->name('visitors.index');
         Route::get('/visitors/export', [Crm\VisitorController::class, 'export'])->middleware('can:exports.run')->name('visitors.export');
+        Route::get('/visitors/create', [Crm\VisitorController::class, 'create'])->middleware('can:visitors.manage')->name('visitors.create');
+        Route::post('/visitors', [Crm\VisitorController::class, 'store'])->middleware('can:visitors.manage')->name('visitors.store');
+        Route::post('/visitors/{user}/invite', [Crm\VisitorController::class, 'invite'])->middleware(['can:visitors.manage', 'throttle:forms'])->name('visitors.invite');
         Route::get('/visitors/{user}', [Crm\VisitorController::class, 'show'])->name('visitors.show');
         Route::put('/visitors/{user}', [Crm\VisitorController::class, 'update'])->middleware('can:visitors.manage')->name('visitors.update');
     });

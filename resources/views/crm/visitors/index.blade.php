@@ -1,5 +1,6 @@
-<x-layouts.crm :title="__('Vizitatori')">
+<x-layouts.crm :title="__('Cumpărători')">
     <x-slot:actions>
+        @can('visitors.manage')<a href="{{ route('crm.visitors.create') }}" class="btn-primary">+ {{ __('Cumpărător nou') }}</a>@endcan
         @can('exports.run')
             <a href="{{ route('crm.visitors.export', request()->query()) }}" class="btn-ghost">CSV</a>
             <a href="{{ route('crm.visitors.export', request()->query() + ['format' => 'xlsx']) }}" class="btn-ghost">XLSX</a>
