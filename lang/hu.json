@@ -1240,5 +1240,22 @@
     "Invitația a fost trimisă la :e.": "A meghívó elküldve ide: :e.",
     "Completează întâi adresa de e-mail a cumpărătorului.": "Előbb add meg a vásárló e-mail címét.",
     "Cumpărătorul are deja cont activ. Dacă și-a uitat parola, o poate reseta de pe pagina de autentificare.": "A vásárlónak már van aktív fiókja. Ha elfelejtette a jelszavát, a bejelentkezési oldalon visszaállíthatja.",
-    "Cumpărătorul a fost actualizat.": "A vásárló adatai frissítve."
+    "Cumpărătorul a fost actualizat.": "A vásárló adatai frissítve.",
+    "Coada de e-mailuri": "E-mail sor",
+    "Ultimul cron": "Utolsó cron",
+    "niciodată": "soha",
+    "Ultima procesare a cozii": "A sor utolsó feldolgozása",
+    "procesate": "feldolgozva",
+    "rămase": "maradt",
+    "Trimite acum mesajele din coadă": "A sorban lévő üzenetek küldése most",
+    "Reîncearcă joburile eșuate": "Sikertelen feladatok újrapróbálása",
+    "Cron-ul nu rulează. Adaugă în cPanel → Cron Jobs (Once Per Minute) comanda:": "A cron nem fut. Add hozzá a cPanel → Cron Jobs alatt (Once Per Minute) a következő parancsot:",
+    "Dacă tot nu merge, PHP-ul din cron are altă versiune decât site-ul (trebuie 8.3+): calea corectă apare în cPanel → MultiPHP Manager.": "Ha így sem működik, a cron PHP-verziója eltér a weboldalétól (8.3+ szükséges): a helyes útvonal a cPanel → MultiPHP Manager alatt látható.",
+    ":n mesaje așteaptă în coadă.": ":n üzenet vár a sorban.",
+    "Procesarea cozii a eșuat: :m": "A sor feldolgozása sikertelen: :m",
+    "Procesate acum: :p. Rămase în coadă: :r.": "Most feldolgozva: :p. A sorban maradt: :r.",
+    "Mesajele care au dat eroare se reîncearcă automat după 1–5 minute; motivul apare în Jurnal notificări.": "A hibás üzenetek 1–5 perc múlva automatikusan újrapróbálódnak; az okot az Értesítési naplóban látod.",
+    ":n joburi eșuate au fost puse înapoi în coadă.": ":n sikertelen feladat visszakerült a sorba.",
+    "PHP în cron": "PHP a cronban",
+    "Comanda cron": "Cron parancs"
 }

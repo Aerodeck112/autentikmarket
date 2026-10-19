@@ -332,6 +332,8 @@ Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->grou
         Route::put('/automations/templates/{template}', [Crm\AutomationController::class, 'update'])->name('automations.update');
         Route::get('/automations/log', [Crm\AutomationController::class, 'log'])->name('automations.log');
         Route::post('/automations/log/{log}/retry', [Crm\AutomationController::class, 'retry'])->name('automations.retry');
+        Route::post('/automations/queue/run', [Crm\AutomationController::class, 'runQueue'])->middleware('throttle:6,1')->name('automations.queue.run');
+        Route::post('/automations/queue/retry-failed', [Crm\AutomationController::class, 'retryFailed'])->middleware('throttle:6,1')->name('automations.queue.retry');
     });
 
     // Rapoarte

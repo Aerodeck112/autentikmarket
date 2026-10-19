@@ -22,6 +22,14 @@
         @if (! $mail['delivers'])
             <p class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{{ __('Aplicația este în modul „:m”: mesajele apar ca trimise în jurnal, dar sunt doar scrise în log și nu ajung la nimeni. Completează datele de mai jos și apasă „Salvează și trimite test”.', ['m' => $mail['mailer']]) }}</p>
         @endif
+        @if ($mail['queued'] > 0)
+            @can('notifications.manage')
+                <form method="POST" action="{{ route('crm.automations.queue.run') }}" class="mt-3 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-cream/60 px-4 py-3 text-sm">@csrf
+                    <span>{{ __(':n mesaje așteaptă în coadă.', ['n' => $mail['queued']]) }}</span>
+                    <button class="btn-accent btn-sm">✉️ {{ __('Trimite acum mesajele din coadă') }}</button>
+                </form>
+            @endcan
+        @endif
         @if (! $mail['heartbeat'])
             <p class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{{ __('Cron-ul nu a rulat încă: mesajele automate rămân în coadă (acum: :n) până când adaugi cron-ul în cPanel → Cron Jobs (vezi CRM → Sistem). Testul de mai jos se trimite imediat, fără cron.', ['n' => $mail['queued']]) }}</p>
         @endif

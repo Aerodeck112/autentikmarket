@@ -7,7 +7,9 @@ use App\Models\ApplicationUpdate;
 use App\Models\AuditLog;
 use App\Services\AuditLogger;
 use App\Support\AppVersion;
+use App\Support\Installer;
 use App\Support\MailSettings;
+use App\Support\QueueRunner;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -40,6 +42,9 @@ class SystemController extends Controller
                 __('Fus orar') => config('app.timezone'),
                 __('Spațiu liber') => ($f = @disk_free_space(base_path())) ? round($f / 1073741824, 1).' GB' : '—',
                 __('Ultimul cron (scheduler)') => Cache::get('scheduler.heartbeat') ?? '—',
+                __('PHP în cron') => ($ci = Cache::get(QueueRunner::HEARTBEAT_INFO_KEY)) ? $ci['php'].' ('.$ci['binary'].')' : '—',
+                __('Ultima procesare a cozii') => ($lr = QueueRunner::lastRun()) ? $lr['at'].' · '.__('procesate').' '.$lr['processed'].' · '.__('rămase').' '.$lr['remaining'] : '—',
+                __('Comanda cron') => Installer::guessPhpCli().' '.base_path('artisan').' schedule:run >> /dev/null 2>&1',
                 __('Joburi în coadă') => DB::table('jobs')->count(),
                 __('Joburi eșuate') => DB::table('failed_jobs')->count(),
             ],

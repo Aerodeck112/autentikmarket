@@ -23,9 +23,26 @@
                 <p class="mt-1 text-xs text-ink-soft">{{ __('Un singur cron: php artisan schedule:run, în fiecare minut.') }}</p>
                 <ul class="mt-3 space-y-2 text-sm">@foreach ($schedule as [$cmd, $when, $desc])<li><span class="font-mono text-xs">{{ $cmd }}</span> <span class="text-xs text-ink-soft">· {{ $when }}</span><br><span class="text-ink-soft">{{ $desc }}</span></li>@endforeach</ul>
             </div>
-            <div class="card card-pad text-sm">
-                <p>{{ __('Joburi în coadă') }}: <strong>{{ $queue }}</strong></p>
-                <p>{{ __('Joburi eșuate') }}: <strong @class(['text-red-700' => $failedJobs])>{{ $failedJobs }}</strong></p>
+            <div id="queue" class="card card-pad space-y-3 text-sm">
+                <h2 class="text-xl">{{ __('Coada de e-mailuri') }}</h2>
+                <p>{{ __('Joburi în coadă') }}: <strong>{{ $queue }}</strong> · {{ __('Joburi eșuate') }}: <strong @class(['text-red-700' => $failedJobs])>{{ $failedJobs }}</strong></p>
+                <p class="text-xs text-ink-soft">
+                    {{ __('Ultimul cron') }}: <strong>{{ $heartbeat ?: __('niciodată') }}</strong>@if ($cronInfo) · PHP {{ $cronInfo['php'] }}@endif
+                    <br>{{ __('Ultima procesare a cozii') }}:
+                    @if ($lastRun)<strong>{{ $lastRun['at'] }}</strong> ({{ $lastRun['source'] === 'crm' ? __('manual') : 'cron' }}) · {{ __('procesate') }} {{ $lastRun['processed'] }} · {{ __('rămase') }} {{ $lastRun['remaining'] }}@if ($lastRun['error'])<br><span class="text-red-700">{{ $lastRun['error'] }}</span>@endif
+                    @else<strong>{{ __('niciodată') }}</strong>@endif
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    <form method="POST" action="{{ route('crm.automations.queue.run') }}">@csrf<button class="btn-accent btn-sm">✉️ {{ __('Trimite acum mesajele din coadă') }}</button></form>
+                    @if ($failedJobs)<form method="POST" action="{{ route('crm.automations.queue.retry') }}">@csrf<button class="btn-ghost btn-sm">↻ {{ __('Reîncearcă joburile eșuate') }}</button></form>@endif
+                </div>
+                @if (! $heartbeat)
+                    <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                        <p class="font-semibold">{{ __('Cron-ul nu rulează. Adaugă în cPanel → Cron Jobs (Once Per Minute) comanda:') }}</p>
+                        <code class="mt-2 block break-all rounded bg-white/70 p-2 font-mono text-[11px]">{{ $cronCommand }}</code>
+                        <p class="mt-2">{{ __('Dacă tot nu merge, PHP-ul din cron are altă versiune decât site-ul (trebuie 8.3+): calea corectă apare în cPanel → MultiPHP Manager.') }}</p>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

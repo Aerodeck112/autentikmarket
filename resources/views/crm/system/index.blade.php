@@ -12,7 +12,7 @@
         </div>
         <div class="card card-pad lg:col-span-2">
             <dl class="grid gap-3 text-sm sm:grid-cols-2">
-                @foreach ($checks as $k => $v)<div class="flex justify-between border-b border-line pb-2"><dt class="text-ink-soft">{{ $k }}</dt><dd class="font-mono">{{ $v }}</dd></div>@endforeach
+                @foreach ($checks as $k => $v)<div class="flex justify-between border-b border-line pb-2"><dt class="text-ink-soft">{{ $k }}</dt><dd class="break-all text-right font-mono">{{ $v }}</dd></div>@endforeach
             </dl>
         </div>
     </div>
