@@ -89,7 +89,7 @@ class BuyerEditionsTest extends TestCase
             'event_id' => $event->id, 'producer_ids' => [$p->id],
         ])->assertSessionHas('success', fn ($m) => str_contains($m, 'Ed. 7'));
 
-        $ilona = User::where('first_name', 'Ilona')->firstOrFail();
+        $ilona = User::where('phone', '0741111222')->firstOrFail();
         $this->assertSame(1, $ilona->checkins()->count());
         $this->assertSame(1, $ilona->interactions()->count());
     }

@@ -1312,5 +1312,7 @@
     "Invitația nu a putut fi trimisă.": "A meghívót nem sikerült elküldeni.",
     "Doar o ediție cu data în trecut, aflată încă în ciornă, planificare sau cu înscrieri deschise, poate fi trecută în arhivă.": "Csak olyan múltbeli dátumú kiadás archiválható, amely még piszkozat, tervezés alatt áll vagy nyitott a jelentkezés.",
     "Adăugat retroactiv": "Utólag hozzáadva",
-    "Pentru o ediție trecută scrie numărul ediției.": "Korábbi kiadásnál írja be a kiadás sorszámát."
+    "Pentru o ediție trecută scrie numărul ediției.": "Korábbi kiadásnál írja be a kiadás sorszámát.",
+    "E-mail sau telefon": "E-mail vagy telefonszám",
+    "sau codul AM-XXXXXX ori telefonul clientului": "vagy az AM-XXXXXX kód, illetve a vásárló telefonszáma"
 }

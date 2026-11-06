@@ -7,7 +7,7 @@
             </div>
             <form method="POST" action="{{ lroute('login.store') }}" class="card card-pad space-y-4 sm:p-8">
                 @csrf
-                <x-input name="email" type="email" :label="__('E-mail')" autocomplete="email" required autofocus />
+                <x-input name="email" :label="__('E-mail sau telefon')" autocomplete="username" required autofocus />
                 <x-input name="password" type="password" :label="__('Parolă')" autocomplete="current-password" required />
                 <div class="flex items-center justify-between text-sm">
                     <label class="flex items-center gap-2"><input type="checkbox" name="remember" value="1" class="rounded border-line text-forest"> {{ __('Ține-mă minte') }}</label>

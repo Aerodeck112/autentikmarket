@@ -151,12 +151,12 @@ class CrmAccountsTest extends TestCase
             'first_name' => 'Ion', 'last_name' => 'Pop', 'phone' => '0741 333 444', 'preferred_language' => 'ro', 'consent_terms' => '1', 'newsletter' => '1',
         ])->assertSessionHas('success');
 
-        $ilona = User::where('first_name', 'Ilona')->firstOrFail();
+        $ilona = User::where('phone', '0741 111 222')->firstOrFail();
         $this->assertNull($ilona->email);
         $this->assertTrue($ilona->hasRole('visitor'));
         $this->assertMatchesRegularExpression('/^AM-/', $ilona->member_code);
         $this->assertSame(4, Consent::where('user_id', $ilona->id)->where('source', 'crm')->count());
-        $this->assertTrue(User::where('first_name', 'Ion')->firstOrFail()->newsletter);
+        $this->assertTrue(User::where('phone', '0741 333 444')->firstOrFail()->newsletter);
         $this->assertSame(0, NotificationLog::count(), 'fără e-mail: nimic de trimis');
     }
 

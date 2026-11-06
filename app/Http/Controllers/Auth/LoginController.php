@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Support\Phone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -18,12 +21,22 @@ class LoginController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
+        // Câmpul „email” acceptă adresa de e-mail SAU numărul de telefon.
+        $data = $request->validate([
+            'email' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string'],
         ]);
+        $login = trim($data['email']);
 
-        if (! Auth::attempt($credentials + ['is_active' => true], $request->boolean('remember'))) {
+        if (Phone::looksLikePhone($login)) {
+            // Un număr poate aparține mai multor conturi (ex. familie): intră contul a cărui parolă se potrivește.
+            $user = User::findByPhone($login)->where('is_active', true)
+                ->first(fn (User $u) => Hash::check($data['password'], (string) $u->password));
+            if (! $user) {
+                throw ValidationException::withMessages(['email' => __('Datele de autentificare nu sunt corecte.')]);
+            }
+            Auth::login($user, $request->boolean('remember'));
+        } elseif (! Auth::attempt(['email' => strtolower($login), 'password' => $data['password'], 'is_active' => true], $request->boolean('remember'))) {
             throw ValidationException::withMessages(['email' => __('Datele de autentificare nu sunt corecte.')]);
         }
 

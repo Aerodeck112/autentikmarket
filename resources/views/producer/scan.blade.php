@@ -21,7 +21,7 @@
                     <div x-show="result" x-cloak class="rounded-xl bg-emerald-50 p-4 text-emerald-900"><p class="font-semibold" x-text="result?.name"></p><p class="text-sm" x-text="result?.message"></p></div>
                     <div x-show="error" x-cloak class="rounded-xl bg-red-50 p-4 text-red-900" x-text="error"></div>
                     <form class="mt-3 flex gap-2" @submit.prevent="handle($refs.code.value); $refs.code.value = ''">
-                        <input x-ref="code" class="field-input" placeholder="{{ __('sau introdu codul AM-XXXXXX') }}">
+                        <input x-ref="code" class="field-input" placeholder="{{ __('sau codul AM-XXXXXX ori telefonul clientului') }}">
                         <button class="btn-primary">OK</button>
                     </form>
                 </div>

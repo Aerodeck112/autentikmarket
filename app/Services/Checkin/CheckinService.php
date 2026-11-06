@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\Loyalty\LoyaltyService;
 use App\Services\Raffles\RaffleService;
+use App\Support\Phone;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
@@ -34,7 +35,17 @@ class CheckinService
             return User::where('member_code', strtoupper($input))->first();
         }
 
-        return strlen($input) >= 20 ? User::where('card_token', $input)->first() : null;
+        if (strlen($input) >= 20) {
+            return User::where('card_token', $input)->first();
+        }
+        // Fără card: numărul de telefon complet al clientului (doar dacă identifică un singur cont).
+        if (Phone::looksLikePhone($input)) {
+            $matches = User::findByPhone($input);
+
+            return $matches->count() === 1 ? $matches->first() : null;
+        }
+
+        return null;
     }
 
     /**

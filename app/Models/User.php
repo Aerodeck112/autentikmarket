@@ -6,8 +6,10 @@ use App\Contracts\HasPreferredLanguage;
 use App\Enums\Language;
 use App\Models\Concerns\HasUuid;
 use App\Services\Notifications\NotificationService;
+use App\Support\Phone;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,7 +24,7 @@ class User extends Authenticatable implements HasPreferredLanguage, MustVerifyEm
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasUuid, Notifiable;
 
-    protected $guarded = ['id', 'uuid', 'member_code', 'card_token', 'remember_token'];
+    protected $guarded = ['id', 'uuid', 'member_code', 'card_token', 'remember_token', 'phone_key'];
 
     protected $hidden = ['password', 'remember_token', 'card_token'];
 
@@ -58,6 +60,23 @@ class User extends Authenticatable implements HasPreferredLanguage, MustVerifyEm
             $user->card_token ??= Str::random(40);
             $user->preferred_language ??= Language::default();
         });
+        static::saving(function (User $user) {
+            if ($user->isDirty('phone') || ($user->phone && ! $user->phone_key)) {
+                $user->phone_key = Phone::key($user->phone);
+            }
+        });
+    }
+
+    /**
+     * Conturile active cu acest număr de telefon (oricum ar fi scris).
+     *
+     * @return Collection<int, User>
+     */
+    public static function findByPhone(?string $phone): Collection
+    {
+        $key = Phone::key($phone);
+
+        return $key ? static::where('phone_key', $key)->whereNull('anonymized_at')->get() : new Collection;
     }
 
     public static function generateMemberCode(): string
