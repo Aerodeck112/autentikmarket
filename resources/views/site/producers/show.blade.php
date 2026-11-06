@@ -1,12 +1,12 @@
 <x-layouts.site :title="$producer->brand_name" :description="Str::limit((string) $producer->t('description'), 160)" :image="$producer->coverUrl()">
     <section class="relative">
-        <div class="h-64 w-full overflow-hidden bg-forest sm:h-96 grain">
+        <div @class(['w-full overflow-hidden bg-forest grain', 'h-64 sm:h-96' => $producer->coverUrl(), 'h-36 sm:h-48' => ! $producer->coverUrl()])>
             @if ($producer->coverUrl())
                 <img src="{{ $producer->coverUrl() }}" alt="" class="size-full object-cover">
             @endif
         </div>
         <div class="container-site">
-            <div class="-mt-16 flex flex-col gap-6 sm:-mt-20 sm:flex-row sm:items-end">
+            <div class="relative z-10 -mt-16 flex flex-col gap-6 sm:-mt-20 sm:flex-row sm:items-start">
                 <div class="grid size-32 shrink-0 place-items-center overflow-hidden rounded-full border-4 border-paper bg-cream shadow-[var(--shadow-lift)] sm:size-40">
                     @if ($producer->logoUrl())
                         <img src="{{ $producer->logoUrl() }}" alt="{{ $producer->brand_name }}" class="size-full object-cover">
@@ -14,7 +14,8 @@
                         <span class="font-display text-5xl text-forest">{{ $producer->initials() }}</span>
                     @endif
                 </div>
-                <div class="flex-1 pb-2">
+                {{-- Doar logo-ul urcă peste banner; textul începe sub el (lizibil pe orice copertă). --}}
+                <div class="flex-1 sm:pt-24">
                     @if ($producer->categories->isNotEmpty())
                         <p class="eyebrow">{{ $producer->categories->map(fn ($c) => trim($c->icon.' '.$c->t('name')))->implode(' · ') }}</p>
                     @elseif ($producer->category)
@@ -25,7 +26,7 @@
                         @if ($reviewsCount) · <span class="font-semibold text-clay">★ {{ $rating }}</span> ({{ $reviewsCount }} {{ __('recenzii') }})@endif
                     </p>
                 </div>
-                <div class="flex flex-wrap gap-2 pb-2">
+                <div class="flex flex-wrap gap-2 sm:pt-24">
                     @if ($producer->shop_url)
                         <a href="{{ $producer->shop_url }}" target="_blank" rel="noopener" class="btn-accent">{{ __('Vezi produsele în Autentik Shop') }} ↗</a>
                     @endif
@@ -39,6 +40,13 @@
 
     <section class="container-site mt-14 grid gap-12 lg:grid-cols-12">
         <div class="lg:col-span-7">
+            @php $hasPresentation = $producer->t('story') || $producer->t('description') || $producer->t('products') || $producer->gallery->isNotEmpty(); @endphp
+            @unless ($hasPresentation)
+                <div class="rounded-[var(--radius-card)] border border-dashed border-line p-8 text-ink-soft">
+                    <p class="font-display text-2xl text-ink">{{ __('Ne vedem la târg!') }}</p>
+                    <p class="mt-2">{{ __('Producătorul își pregătește prezentarea. Până atunci, îl găsești la standul lui de la Autentik Market.') }}</p>
+                </div>
+            @endunless
             @if ($producer->t('story'))
                 <h2 class="text-3xl">{{ __('Povestea noastră') }}</h2>
                 <div class="prose-am mt-4">{!! nl2br(e($producer->t('story'))) !!}</div>
