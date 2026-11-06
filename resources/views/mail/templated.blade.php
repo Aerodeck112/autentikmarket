@@ -16,6 +16,14 @@
                 <h1 style="font-family:'Oswald','Arial Narrow',Arial,sans-serif;font-size:24px;font-weight:600;line-height:1.25;margin:0 0 18px;color:#1a2b20">{{ $subject }}</h1>
                 {!! $bodyHtml !!}
             </td></tr>
+            @if (! empty($rulesUrl))
+                <tr><td style="padding:0 28px 14px;font-size:14px;line-height:1.6;color:#26372b">
+                    <div style="background:#faf3e1;border-radius:12px;padding:12px 16px">
+                        📄 {{ __('Te rugăm să citești regulamentul interior al târgului:') }}
+                        <a href="{{ $rulesUrl }}" style="color:#b5651d;font-weight:bold">{{ __('Regulament interior') }}</a>
+                    </div>
+                </td></tr>
+            @endif
             @if ($actionUrl && $actionLabel)
                 <tr><td style="padding:6px 28px 26px">
                     <a href="{{ $actionUrl }}" style="display:inline-block;background:#dd8d2b;color:#133e23;text-decoration:none;font-weight:bold;font-size:14px;padding:12px 22px;border-radius:999px">{{ $actionLabel }}</a>

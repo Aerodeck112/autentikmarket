@@ -66,6 +66,9 @@ class SettingsController extends Controller
             'documents_contract_next' => ['nullable', 'integer', 'min:1', 'max:9999999'],
             'documents_annex_next' => ['nullable', 'integer', 'min:1', 'max:9999999'],
             'documents_reset_yearly' => ['nullable', 'boolean'],
+            'documents_rules_url' => ['nullable', 'url', 'max:500'],
+            'rules_file' => ['nullable', 'file', 'mimes:pdf', 'mimetypes:application/pdf', 'max:'.config('autentik.uploads.document_max_kb')],
+            'remove_rules' => ['nullable', 'boolean'],
             'seo_default_description_ro' => ['nullable', 'string', 'max:255'],
             'seo_default_description_hu' => ['nullable', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
@@ -86,7 +89,7 @@ class SettingsController extends Controller
 
         $map = [];
         foreach ($data as $k => $v) {
-            if (in_array($k, ['logo', 'hero', 'remove_logo', 'remove_hero'], true)) {
+            if (in_array($k, ['logo', 'hero', 'remove_logo', 'remove_hero', 'rules_file', 'remove_rules'], true)) {
                 continue;
             }
             [$group, $rest] = explode('_', $k, 2);
@@ -105,6 +108,12 @@ class SettingsController extends Controller
                 }
                 Settings::set($key, $request->hasFile($field) ? Uploads::storeImage($request->file($field), 'brand') : '', 'brand');
             }
+        }
+        if ($request->boolean('remove_rules') || $request->hasFile('rules_file')) {
+            if ($old = Settings::get('documents.rules_path')) {
+                Storage::disk('public')->delete($old);
+            }
+            Settings::set('documents.rules_path', $request->hasFile('rules_file') ? Uploads::storePublicPdf($request->file('rules_file'), 'documents') : '', 'documents');
         }
         Cache::forget('home.v1.ro');
         Cache::forget('home.v1.hu');

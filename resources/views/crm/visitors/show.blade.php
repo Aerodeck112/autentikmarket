@@ -7,7 +7,7 @@
                 <p class="mt-3 font-display text-4xl">{{ $visitor->checkins_count }} <span class="text-base text-ink-soft">{{ __('vizite') }}</span></p>
                 <dl class="mt-4 space-y-1 text-sm">
                     <div><dt class="inline text-ink-soft">E-mail:</dt> <dd class="inline">{{ $visitor->email ?: '—' }}</dd> @if ($visitor->email_verified_at)✓@endif</div>
-                    <div><dt class="inline text-ink-soft">{{ __('Telefon') }}:</dt> <dd class="inline">{{ $visitor->phone ?: '—' }}</dd></div>
+                    <div><dt class="inline text-ink-soft">{{ __('Telefon') }}:</dt> <dd class="inline">{{ $visitor->phone ?: '—' }}</dd> <x-whatsapp-link :phone="$visitor->phone" :text="__('Bună ziua, :n!', ['n' => $visitor->first_name])" /></div>
                     <div><dt class="inline text-ink-soft">{{ __('Localitate') }}:</dt> <dd class="inline">{{ $visitor->city ?: '—' }}</dd></div>
                     <div><dt class="inline text-ink-soft">{{ __('Înscris') }}:</dt> <dd class="inline">{{ $visitor->created_at->format('d.m.Y') }}</dd></div>
                     <div><dt class="inline text-ink-soft">Newsletter / Marketing:</dt> <dd class="inline">{{ $visitor->newsletter ? '✓' : '—' }} / {{ $visitor->marketing_consent ? '✓' : '—' }}</dd></div>

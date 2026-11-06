@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Consent;
 use App\Models\Producer;
 use App\Models\User;
+use App\Services\Notifications\AdminNotifier;
 use App\Services\Notifications\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -93,6 +94,10 @@ class RegisterController extends Controller
             'action_label_hu' => 'Profil kitöltése',
         ]);
         $user->sendEmailVerificationNotification();
+        app(AdminNotifier::class)->notify('ADMIN_PRODUCER_REGISTERED', [
+            'producer_name' => $user->producer->brand_name, 'city' => (string) ($user->producer->city ?: '—'),
+            'contact_name' => $user->name, 'contact_email' => (string) $user->email, 'contact_phone' => (string) ($user->phone ?: '—'),
+        ], $user->producer, 'admin-producer-registered:'.$user->producer->id, route('crm.producers.show', $user->producer), ['ro' => 'Vezi producătorul', 'hu' => 'Termelő megtekintése']);
 
         return redirect()->route('producer.profile')->with('success', __('Contul de producător a fost creat. Completează profilul și documentele.'));
     }

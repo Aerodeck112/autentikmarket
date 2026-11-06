@@ -83,6 +83,16 @@
                 </div>
                 <x-checkbox name="documents_reset_yearly" :label="__('Numărătoarea repornește de la 1 în fiecare an')" :checked="setting('documents.reset_yearly', '1') === '1'" />
             </div>
+            <div class="rounded-xl border border-line p-4 space-y-3">
+                <p class="text-sm font-semibold">{{ __('Regulament interior al târgului') }}</p>
+                <p class="text-xs text-ink-soft">{{ __('Linkul se trimite automat producătorilor la crearea contului (înscriere sau invitație) și la aprobare, și apare în contul lor.') }}</p>
+                @if ($rules = \App\Support\Settings::rulesUrl())
+                    <p class="text-sm"><a href="{{ $rules }}" target="_blank" class="text-clay hover:underline">↗ {{ __('Regulamentul actual') }}</a></p>
+                @endif
+                <x-input name="rules_file" type="file" :label="__('Încarcă PDF')" accept=".pdf,application/pdf" />
+                <x-input name="documents_rules_url" type="url" :label="__('sau link (dacă e publicat în altă parte)')" :value="setting('documents.rules_url')" placeholder="https://" />
+                @if (setting('documents.rules_path'))<x-checkbox name="remove_rules" :label="__('Șterge PDF-ul încărcat')" />@endif
+            </div>
         </div>
         <div class="card card-pad space-y-4">
             <h2 class="text-xl">{{ __('Organizator (date pentru contracte)') }}</h2>

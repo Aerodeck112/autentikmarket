@@ -6,6 +6,7 @@
             <div class="mt-2 flex items-center gap-2 text-sm text-ink-soft">
                 <x-status :status="$producer->status" /> <x-lang-badge :lang="$producer->preferred_language" />
                 @if ($producer->isApproved())<a href="{{ lroute('producers.show', $producer->slug) }}" target="_blank" class="text-clay underline">{{ __('Profil public') }} ↗</a>@endif
+                @if ($rules = \App\Support\Settings::rulesUrl())<a href="{{ $rules }}" target="_blank" class="text-clay underline">📄 {{ __('Regulament interior') }}</a>@endif
             </div>
         </div>
     </div>

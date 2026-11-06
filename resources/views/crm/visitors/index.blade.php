@@ -34,7 +34,7 @@
                 @endphp
                 <tr>
                     <td><a href="{{ route('crm.visitors.show', $v) }}" class="font-medium hover:text-clay">{{ $v->name }}</a><p class="font-mono text-xs text-ink-soft">{{ $v->member_code }}@if ($v->city) · {{ $v->city }}@endif</p></td>
-                    <td class="text-sm">{{ $v->email ?: '—' }}<p class="text-xs text-ink-soft">{{ $v->phone }}</p></td>
+                    <td class="text-sm">{{ $v->email ?: '—' }}<p class="text-xs text-ink-soft">{{ $v->phone }} <x-whatsapp-link :phone="$v->phone" label="" class="!px-1" /></p></td>
                     <td><x-lang-badge :lang="$v->preferred_language" /></td>
                     <td class="text-right font-semibold">{{ $v->checkins_count }}</td>
                     <td class="text-xs">

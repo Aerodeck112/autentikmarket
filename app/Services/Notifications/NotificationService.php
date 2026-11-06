@@ -7,6 +7,7 @@ use App\Enums\NotificationStatus;
 use App\Jobs\SendNotificationJob;
 use App\Models\NotificationLog;
 use App\Models\NotificationTemplate;
+use App\Support\Settings;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
@@ -22,6 +23,9 @@ use Illuminate\Support\Traits\Localizable;
 class NotificationService
 {
     use Localizable;
+
+    /** Mesaje după care producătorul primește și linkul către regulamentul interior (dacă e setat în CRM). */
+    public const RULES_LINK_KEYS = ['PRODUCER_REGISTERED', 'PRODUCER_INVITE', 'PRODUCER_APPROVED'];
 
     public function __construct(protected TemplateRenderer $renderer) {}
 
@@ -64,6 +68,7 @@ class NotificationService
             'actionUrl' => $actionUrl,
             'actionLabel' => $actionLabel,
             'lang' => $lang,
+            'rulesUrl' => in_array($key, self::RULES_LINK_KEYS, true) ? Settings::rulesUrl() : null,
         ])->render());
 
         $email = $recipient->notificationEmail();

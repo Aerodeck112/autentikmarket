@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 /**
@@ -39,6 +40,8 @@ class Settings
         'documents.contract_format' => '{prefix}-C-{an}-{nr:4}',
         'documents.annex_format' => '{prefix}-A-{an}-{nr:4}',
         'documents.reset_yearly' => '1',
+        'documents.rules_url' => '',
+        'documents.rules_path' => '',
         'seo.default_description_ro' => 'Târg lunar de producători locali și artizani în Târgu Mureș. Produse autentice, direct de la cei care le fac.',
         'seo.default_description_hu' => 'Havi termelői és kézműves vásár Marosvásárhelyen. Autentikus termékek, közvetlenül a készítőktől.',
     ];
@@ -96,6 +99,18 @@ class Settings
     public static function holdMinutes(): int
     {
         return max(1, (int) static::get('reservations.hold_minutes', config('autentik.stand_hold_minutes', 15)));
+    }
+
+    /** Regulamentul interior al târgului: PDF încărcat în CRM sau link extern; null dacă nu e setat. */
+    public static function rulesUrl(): ?string
+    {
+        $path = trim((string) static::get('documents.rules_path', ''));
+        if ($path !== '') {
+            return Storage::disk('public')->url($path);
+        }
+        $url = trim((string) static::get('documents.rules_url', ''));
+
+        return filter_var($url, FILTER_VALIDATE_URL) ? $url : null;
     }
 
     public static function shopUrl(): ?string

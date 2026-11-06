@@ -18,6 +18,14 @@ class Uploads
         return $file->storeAs($dir, Str::uuid().'.'.$ext, 'public');
     }
 
+    /** PDF public (ex. regulamentul interior), servit din storage/app/public. */
+    public static function storePublicPdf(UploadedFile $file, string $dir): string
+    {
+        $ext = self::safeExtension($file, ['pdf']);
+
+        return $file->storeAs($dir, Str::uuid().'.'.$ext, 'public');
+    }
+
     public static function storePrivate(UploadedFile $file, string $dir, array $allowed = ['pdf', 'jpg', 'jpeg', 'png']): string
     {
         $ext = self::safeExtension($file, $allowed);

@@ -7,6 +7,7 @@
                 <p class="mt-6 text-lg text-ink-soft">{{ __('Autentik Market caută producători locali și artizani care își fac singuri produsele. Înscrierea, verificarea, alegerea standului și documentele se fac online, din contul tău.') }}</p>
                 <div class="mt-8 flex flex-wrap gap-3">
                     <a href="{{ lroute('register.producer') }}" class="btn-accent btn-lg">{{ __('Înscrie-te ca producător') }}</a>
+                    @if ($rules = \App\Support\Settings::rulesUrl())<a href="{{ $rules }}" target="_blank" class="btn-ghost btn-lg">📄 {{ __('Regulament interior') }}</a>@endif
                     <a href="{{ lroute('login') }}" class="btn-ghost btn-lg">{{ __('Am deja cont') }}</a>
                 </div>
             </div>

@@ -1378,5 +1378,15 @@
     "Producătorul își pregătește prezentarea. Până atunci, îl găsești la standul lui de la Autentik Market.": "A termelő most készíti a bemutatkozását. Addig is megtalálod a standjánál az Autentik Marketen.",
     "Există deja un contract cu acest număr.": "Már létezik szerződés ezzel a számmal.",
     "Contractul :n a fost încărcat.": "A(z) :n szerződés feltöltve.",
-    "Formatul trebuie să conțină {nr} și doar litere, cifre, / - . _ și {prefix} {an} {nr} {nr:4}.": "A formátumnak tartalmaznia kell a {nr} elemet, és csak betűket, számjegyeket, / - . _ jeleket, valamint {prefix} {an} {nr} {nr:4} elemeket tartalmazhat."
+    "Formatul trebuie să conțină {nr} și doar litere, cifre, / - . _ și {prefix} {an} {nr} {nr:4}.": "A formátumnak tartalmaznia kell a {nr} elemet, és csak betűket, számjegyeket, / - . _ jeleket, valamint {prefix} {an} {nr} {nr:4} elemeket tartalmazhat.",
+    "Scrie pe WhatsApp": "Írj WhatsAppon",
+    "Bună ziua, :n!": "Jó napot, :n!",
+    "Regulament interior al târgului": "A vásár belső szabályzata",
+    "Linkul se trimite automat producătorilor la crearea contului (înscriere sau invitație) și la aprobare, și apare în contul lor.": "A link automatikusan elmegy a termelőknek a fiók létrehozásakor (regisztráció vagy meghívó) és jóváhagyáskor, és a fiókjukban is megjelenik.",
+    "Regulamentul actual": "A jelenlegi szabályzat",
+    "Încarcă PDF": "PDF feltöltése",
+    "sau link (dacă e publicat în altă parte)": "vagy link (ha máshol van közzétéve)",
+    "Șterge PDF-ul încărcat": "A feltöltött PDF törlése",
+    "Te rugăm să citești regulamentul interior al târgului:": "Kérjük, olvasd el a vásár belső szabályzatát:",
+    "Regulament interior": "Belső szabályzat"
 }

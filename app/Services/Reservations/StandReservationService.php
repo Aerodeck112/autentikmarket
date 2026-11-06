@@ -14,6 +14,7 @@ use App\Models\StandReservation;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\Documents\DocumentService;
+use App\Services\Notifications\AdminNotifier;
 use App\Services\Notifications\NotificationService;
 use App\Support\Settings;
 use Illuminate\Database\QueryException;
@@ -52,7 +53,7 @@ class StandReservationService
         $this->expireHolds($event->id);
 
         try {
-            return DB::transaction(function () use ($event, $slot, $producer) {
+            $result = DB::transaction(function () use ($event, $slot, $producer) {
                 /** @var EventSlot $locked */
                 $locked = EventSlot::whereKey($slot->id)->lockForUpdate()->firstOrFail();
 
@@ -106,6 +107,12 @@ class StandReservationService
 
                 return $reservation;
             }, 3);
+            // după commit: doar la o rezervare nouă (nu la re-click pe propriul hold)
+            if ($result->wasRecentlyCreated) {
+                $this->notifyAdmins('ADMIN_STAND_HOLD', $result, ['hold_until' => $result->hold_expires_at?->format('H:i')]);
+            }
+
+            return $result;
         } catch (UniqueConstraintViolationException) {
             throw new BusinessRuleException(__('Standul a fost deja selectat de alt producător.'), 'slot_taken');
         } catch (QueryException $e) {
@@ -163,6 +170,7 @@ class StandReservationService
             'related' => $reservation,
             'dedupe_key' => 'reservation-requested:'.$reservation->id,
         ]);
+        $this->notifyAdmins('ADMIN_STAND_REQUEST', $reservation);
 
         return $reservation;
     }
@@ -374,6 +382,19 @@ class StandReservationService
     protected function isUniqueViolation(QueryException $e): bool
     {
         return in_array($e->getCode(), ['23000', '23505'], true) || str_contains($e->getMessage(), 'UNIQUE');
+    }
+
+    /** Administratorii și super adminii sunt anunțați (fiecare în limba lui). */
+    protected function notifyAdmins(string $key, StandReservation $r, array $extra = []): void
+    {
+        $r->loadMissing(['event', 'slot', 'producer']);
+        app(AdminNotifier::class)->notify($key, [
+            'producer_name' => $r->producer->brand_name,
+            'event_title' => $r->event->title_ro,
+            'event_date' => $r->event->event_date->format('d.m.Y'),
+            'stand_code' => $r->slot->code,
+            'stand_size' => $r->slot->dimensions(),
+        ] + $extra, $r, strtolower($key).':'.$r->id, route('crm.reservations.index', $r->event), ['ro' => 'Vezi rezervările', 'hu' => 'Foglalások megtekintése']);
     }
 
     protected function payload(StandReservation $r): array

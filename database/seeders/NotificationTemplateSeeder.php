@@ -199,6 +199,27 @@ class NotificationTemplateSeeder extends Seeder
                 'body_ro' => 'Producătorul {{producer_name}} ({{city}}) a trimis profilul și documentele spre verificare.',
                 'body_hu' => 'A(z) {{producer_name}} ({{city}}) termelő ellenőrzésre küldte profilját és dokumentumait.',
             ],
+            'ADMIN_PRODUCER_REGISTERED' => [
+                'description' => 'Intern (admin, super admin) — producător nou înscris pe site',
+                'subject_ro' => 'Producător nou înscris: {{producer_name}}',
+                'subject_hu' => 'Új termelő regisztrált: {{producer_name}}',
+                'body_ro' => "Producătorul {{producer_name}} ({{city}}) și-a creat cont pe platformă.\n\nPersoana de contact: {{contact_name}}, {{contact_email}}, {{contact_phone}}.\n\nUrmează să își completeze profilul și documentele.",
+                'body_hu' => "A(z) {{producer_name}} ({{city}}) termelő fiókot hozott létre a platformon.\n\nKapcsolattartó: {{contact_name}}, {{contact_email}}, {{contact_phone}}.\n\nA következő lépésben kitölti a profilját és a dokumentumait.",
+            ],
+            'ADMIN_STAND_HOLD' => [
+                'description' => 'Intern (admin, super admin) — producător a rezervat temporar un stand',
+                'subject_ro' => 'Rezervare temporară: standul {{stand_code}} — {{producer_name}}',
+                'subject_hu' => 'Ideiglenes foglalás: {{stand_code}} stand — {{producer_name}}',
+                'body_ro' => "Producătorul {{producer_name}} a rezervat temporar standul {{stand_code}} ({{stand_size}}) la {{event_title}}, {{event_date}}.\n\nRezervarea expiră la {{hold_until}} dacă producătorul nu trimite cererea.",
+                'body_hu' => "A(z) {{producer_name}} termelő ideiglenesen lefoglalta a(z) {{stand_code}} standot ({{stand_size}}): {{event_title}}, {{event_date}}.\n\nA foglalás {{hold_until}}-kor lejár, ha a termelő nem küldi el a kérelmet.",
+            ],
+            'ADMIN_STAND_REQUEST' => [
+                'description' => 'Intern (admin, super admin) — cerere de stand trimisă de producător',
+                'subject_ro' => 'Cerere de stand de aprobat: {{stand_code}} — {{producer_name}}',
+                'subject_hu' => 'Jóváhagyandó standkérelem: {{stand_code}} — {{producer_name}}',
+                'body_ro' => "Producătorul {{producer_name}} a trimis cererea pentru standul {{stand_code}} ({{stand_size}}) la {{event_title}}, {{event_date}}.\n\nCererea așteaptă aprobarea voastră.",
+                'body_hu' => "A(z) {{producer_name}} termelő elküldte a kérelmét a(z) {{stand_code}} standra ({{stand_size}}): {{event_title}}, {{event_date}}.\n\nA kérelem jóváhagyásra vár.",
+            ],
             'TEST_EMAIL' => [
                 'description' => 'Test configurare SMTP',
                 'subject_ro' => 'Test e-mail Autentik Market',
