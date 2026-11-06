@@ -30,7 +30,16 @@
                         </form>
                         <p class="mt-2 text-xs text-ink-soft">{{ __('La „Încheiat” pornește automat workflow-ul post-eveniment: mulțumiri RO/HU, cereri de recenzie, task-uri, draft blog.') }}</p>
                     @endif
+                    @if (\App\Services\Events\EventLifecycleService::canArchive($event))
+                        <form method="POST" action="{{ route('crm.events.archive', $event) }}" class="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900" onsubmit="return confirm('{{ __('Treci ediția în arhivă?') }}')">@csrf
+                            <span>{{ __('Data a trecut. Dacă e o ediție veche adăugată acum, treci-o în arhivă: devine „Încheiat” fără e-mailuri și fără task-uri.') }}</span>
+                            <button class="btn-ghost btn-sm">{{ __('Trece în arhivă (ediție trecută)') }}</button>
+                        </form>
+                    @endif
                 @endcan
+                @if ($event->archived_at)
+                    <p class="mt-3 text-xs text-ink-soft">{{ __('Ediție din arhivă (adăugată retroactiv): fără e-mailurile de după târg.') }}</p>
+                @endif
             </div>
 
             {{-- STATISTICI --}}
@@ -133,7 +142,7 @@
                 @empty
                     @can('blog.manage')<form method="POST" action="{{ route('crm.blog.from-event', $event) }}" class="mt-2">@csrf<button class="btn-ghost btn-sm">{{ __('Generează draft din eveniment') }}</button></form>@endcan
                 @endforelse
-                @if ($event->status->value === 'completed')
+                @if ($event->status->value === 'completed' && ! $event->archived_at)
                     @can('events.manage')<form method="POST" action="{{ route('crm.events.post-event', $event) }}" class="mt-3">@csrf<button class="btn-ghost btn-sm">{{ __('Rulează din nou workflow-ul post-eveniment') }}</button></form>@endcan
                 @endif
             </div>

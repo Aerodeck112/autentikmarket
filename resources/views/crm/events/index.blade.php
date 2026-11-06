@@ -1,6 +1,9 @@
 <x-layouts.crm :title="__('Evenimente')">
     <x-slot:actions>
-        @can('events.manage')<a href="{{ route('crm.events.create') }}" class="btn-primary">+ {{ __('Eveniment nou') }}</a>@endcan
+        @can('events.manage')
+            <a href="{{ route('crm.events.create', ['past' => 1]) }}" class="btn-ghost">+ {{ __('Ediție trecută') }}</a>
+            <a href="{{ route('crm.events.create') }}" class="btn-primary">+ {{ __('Eveniment nou') }}</a>
+        @endcan
     </x-slot:actions>
     <div class="mb-4 flex flex-wrap gap-2">
         <a href="{{ route('crm.events.index') }}" @class(['chip', 'chip-active' => ! $status])>{{ __('Toate') }}</a>

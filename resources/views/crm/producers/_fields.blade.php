@@ -10,7 +10,7 @@
             <x-input name="city" :label="__('Localitate')" :value="$producer->city" />
             <x-input name="county" :label="__('Județ')" :value="$producer->county" />
             <x-input name="phone" :label="__('Telefon')" :value="$producer->phone" />
-            <x-input name="email" type="email" label="E-mail" :value="$producer->email" />
+            <x-input name="email" type="email" label="E-mail" :value="$producer->email" :help="__('Opțional. Dacă îl completezi, producătorul primește invitație pe platformă.')" />
             <x-input name="website" type="url" label="Website" :value="$producer->website" />
             <x-input name="facebook" type="url" label="Facebook" :value="$producer->facebook" />
             <x-input name="instagram" type="url" label="Instagram" :value="$producer->instagram" />

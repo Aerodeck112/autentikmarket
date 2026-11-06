@@ -196,6 +196,7 @@ Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->grou
         Route::get('/events/{event}/edit', [Crm\EventController::class, 'edit'])->middleware('can:events.manage')->name('events.edit');
         Route::put('/events/{event}', [Crm\EventController::class, 'update'])->middleware('can:events.manage')->name('events.update');
         Route::post('/events/{event}/status', [Crm\EventController::class, 'status'])->middleware('can:events.manage')->name('events.status');
+        Route::post('/events/{event}/archive', [Crm\EventController::class, 'archive'])->middleware('can:events.manage')->name('events.archive');
         Route::post('/events/{event}/snapshot', [Crm\EventController::class, 'snapshot'])->middleware('can:maps.manage')->name('events.snapshot');
         Route::post('/events/{event}/photos', [Crm\EventController::class, 'uploadPhotos'])->middleware('can:events.manage')->name('events.photos');
         Route::delete('/events/{event}/photos/{media}', [Crm\EventController::class, 'deletePhoto'])->middleware('can:events.manage')->name('events.photos.destroy');

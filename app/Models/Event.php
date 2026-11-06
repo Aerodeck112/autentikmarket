@@ -22,7 +22,7 @@ class Event extends Model
     /** @use HasFactory<EventFactory> */
     use HasFactory, HasTranslations;
 
-    protected $guarded = ['id', 'status', 'completed_at', 'post_event_processed_at', 'reminders_sent_at'];
+    protected $guarded = ['id', 'status', 'completed_at', 'post_event_processed_at', 'reminders_sent_at', 'archived_at'];
 
     protected function casts(): array
     {
@@ -33,6 +33,7 @@ class Event extends Model
             'registration_start' => 'datetime',
             'registration_end' => 'datetime',
             'completed_at' => 'datetime',
+            'archived_at' => 'datetime',
             'post_event_processed_at' => 'datetime',
             'reminders_sent_at' => 'datetime',
         ];

@@ -48,18 +48,61 @@ class CrmAccountsTest extends TestCase
         $this->assertStringContainsString('/invite/'.$p->user->id, $log->body);
     }
 
-    public function test_account_is_required_to_have_an_email(): void
+    public function test_email_is_optional_and_invitation_is_sent_when_it_is_added_later(): void
     {
-        $this->actingAs($this->admin())->post(route('crm.producers.store'), $this->producerForm([
-            'email' => '', 'create_account' => '1', 'contact_first_name' => 'A', 'contact_last_name' => 'B',
-        ]))->assertSessionHasErrors('email');
+        $admin = $this->admin();
+        $this->actingAs($admin)->post(route('crm.producers.store'), $this->producerForm([
+            'email' => '', 'create_account' => '1', 'representative_name' => 'Bartha Anna',
+        ]))->assertSessionHasNoErrors()->assertSessionHas('success');
+
+        $p = Producer::where('brand_name', 'Livada Test')->firstOrFail();
+        $this->assertNull($p->email);
+        $this->assertNull($p->user_id);
+        $this->get(route('crm.producers.show', $p))->assertOk()->assertSee('Nu are e-mail');
+        $this->assertSame(0, NotificationLog::where('template_key', 'PRODUCER_INVITE')->count());
+
+        // Organizatorul completează e-mailul din „Editează” → cont + invitație, fără alte câmpuri obligatorii.
+        $this->put(route('crm.producers.update', $p), $this->producerForm([
+            'email' => 'Livada@Example.test', 'representative_name' => 'Bartha Anna', 'create_account' => '1',
+        ]))->assertSessionHas('success');
+
+        $p->refresh();
+        $this->assertNotNull($p->user_id);
+        $this->assertSame('livada@example.test', $p->user->email);
+        $this->assertSame(['Bartha', 'Anna'], [$p->user->first_name, $p->user->last_name]);
+        $this->assertTrue($p->user->hasRole('producer'));
+        $this->assertSame(1, NotificationLog::where('template_key', 'PRODUCER_INVITE')->count());
+
+        // O nouă salvare nu mai trimite nimic.
+        $this->put(route('crm.producers.update', $p), $this->producerForm(['email' => 'livada@example.test', 'create_account' => '1']));
+        $this->assertSame(1, NotificationLog::where('template_key', 'PRODUCER_INVITE')->count());
+    }
+
+    public function test_email_added_on_edit_without_invite_checkbox_creates_no_account(): void
+    {
+        $this->actingAs($this->admin())->post(route('crm.producers.store'), $this->producerForm(['email' => '']));
+        $p = Producer::where('brand_name', 'Livada Test')->firstOrFail();
+        $this->put(route('crm.producers.update', $p), $this->producerForm(['email' => 'livada@example.test']))->assertSessionHas('success');
+
+        $this->assertNull($p->fresh()->user_id);
+        $this->assertSame('livada@example.test', $p->fresh()->email);
+    }
+
+    public function test_invite_button_without_contact_name_uses_the_brand(): void
+    {
+        $this->actingAs($this->admin())->post(route('crm.producers.store'), $this->producerForm(['create_account' => '0']));
+        $p = Producer::where('brand_name', 'Livada Test')->firstOrFail();
+
+        $this->post(route('crm.producers.invite', $p))->assertSessionHas('success');
+        $this->assertSame('Livada', $p->fresh()->user->first_name);
+        $this->assertSame(1, NotificationLog::where('template_key', 'PRODUCER_INVITE')->count());
     }
 
     public function test_existing_buyer_account_is_linked_instead_of_duplicated(): void
     {
         $buyer = $this->visitor();
         $this->actingAs($this->admin())->post(route('crm.producers.store'), $this->producerForm([
-            'email' => strtoupper($buyer->email), 'create_account' => '1', 'contact_first_name' => 'A', 'contact_last_name' => 'B',
+            'email' => strtoupper($buyer->email), 'create_account' => '1',
         ]))->assertSessionHas('success');
 
         $this->assertSame($buyer->id, Producer::where('brand_name', 'Livada Test')->value('user_id'));
@@ -157,7 +200,7 @@ class CrmAccountsTest extends TestCase
     public function test_crm_pages_render(): void
     {
         $this->actingAs($this->admin());
-        $this->get(route('crm.producers.create'))->assertOk()->assertSee('Creează cont pentru producător');
+        $this->get(route('crm.producers.create'))->assertOk()->assertSee('Trimite invitație pe platformă');
         $this->get(route('crm.visitors.create'))->assertOk()->assertSee('Adaugă cumpărătorul');
         $this->get(route('crm.visitors.index'))->assertOk()->assertSee('Cumpărător nou');
     }

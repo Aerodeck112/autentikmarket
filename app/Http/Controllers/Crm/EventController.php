@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Crm;
 
 use App\Enums\EventStatus;
+use App\Enums\ProducerStatus;
+use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Media;
+use App\Models\Producer;
 use App\Models\Venue;
 use App\Services\Events\EventLifecycleService;
 use App\Services\Events\LayoutSnapshotService;
@@ -16,6 +19,7 @@ use App\Services\Tasks\TaskGenerator;
 use App\Support\Uploads;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -37,24 +41,58 @@ class EventController extends Controller
         return view('crm.events.index', ['events' => $events, 'status' => $status, 'cities' => Event::distinct()->pluck('city')]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('crm.events.form', ['event' => new Event(['start_time' => '08:00', 'end_time' => '15:00']), 'venues' => Venue::where('active', true)->orderBy('name')->get()]);
+        return view('crm.events.form', [
+            'event' => new Event(['start_time' => '08:00', 'end_time' => '15:00']),
+            'venues' => Venue::where('active', true)->orderBy('name')->get(),
+            'past' => $request->boolean('past'),
+            'producers' => $this->producerOptions(),
+            'present' => [],
+        ]);
+    }
+
+    /** @return array<int, string> producătorii (în afară de cei respinși), pentru ediții trecute */
+    protected function producerOptions(): array
+    {
+        return Producer::where('status', '!=', ProducerStatus::Rejected->value)->orderBy('brand_name')->pluck('brand_name', 'id')->all();
+    }
+
+    /** Ediție din trecut, intrată în CRM pe fluxul normal → arhivă (fără e-mailurile de după târg). */
+    public function archive(Request $request, Event $event): RedirectResponse
+    {
+        $this->lifecycle->archive($event, $request->user());
+        Cache::forget('home.v1.ro');
+        Cache::forget('home.v1.hu');
+
+        return back()->with('success', __('Ediția a fost trecută în arhivă (încheiată), fără e-mailuri către producători sau vizitatori.'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validated($request);
+        // Ediție trecută: numărul automat (următorul după cel mai mare) ar fi greșit → se scrie de mână.
+        if (empty($data['edition']) && Carbon::parse($data['event_date'])->lt(today())) {
+            return back()->withInput()->withErrors(['edition' => __('Pentru o ediție trecută scrie numărul ediției.')]);
+        }
         if ($request->hasFile('cover')) {
             $data['cover_path'] = Uploads::storeImage($request->file('cover'), 'events');
         }
-        unset($data['cover']);
+        unset($data['cover'], $data['present_ids'], $data['present_form']);
         if (empty($data['edition'])) {
             unset($data['edition']); // se numerotează automat
         }
         $event = $this->lifecycle->create($data, $request->user());
         Cache::forget('home.v1.ro');
         Cache::forget('home.v1.hu');
+
+        if (EventLifecycleService::isPast($event)) {
+            if ($request->boolean('present_form')) {
+                $this->lifecycle->syncPastParticipants($event, $request->input('present_ids', []), $request->user());
+            }
+
+            return redirect()->route('crm.events.show', $event)->with('success', __('Ediția trecută a fost adăugată în arhivă (încheiată). Nu s-au trimis e-mailuri și nu s-au generat task-uri. Vizitele cumpărătorilor le poți înregistra din fișa fiecăruia.'));
+        }
 
         return redirect()->route('crm.events.show', $event)->with('success', __('Evenimentul a fost creat. Harta și checklist-ul au fost generate automat.'));
     }
@@ -73,7 +111,13 @@ class EventController extends Controller
 
     public function edit(Event $event): View
     {
-        return view('crm.events.form', ['event' => $event, 'venues' => Venue::orderBy('name')->get()]);
+        return view('crm.events.form', [
+            'event' => $event,
+            'venues' => Venue::orderBy('name')->get(),
+            'past' => false,
+            'producers' => $this->producerOptions(),
+            'present' => $event->registrations()->where('status', RegistrationStatus::Approved->value)->pluck('producer_id')->all(),
+        ]);
     }
 
     public function update(Request $request, Event $event, TaskGenerator $tasks): RedirectResponse
@@ -85,12 +129,15 @@ class EventController extends Controller
             }
             $data['cover_path'] = Uploads::storeImage($request->file('cover'), 'events');
         }
-        unset($data['cover']);
+        unset($data['cover'], $data['present_ids'], $data['present_form']);
         $data['edition'] ??= $event->edition ?? Event::nextEdition($data['venue_id'] ?? $event->venue_id, $data['city'] ?? $event->city);
         $dateChanged = $data['event_date'] !== $event->event_date->toDateString();
         $event->update($data);
-        if ($dateChanged) {
+        if ($dateChanged && ! EventLifecycleService::isPast($event)) {
             $tasks->rescheduleForEvent($event->fresh());
+        }
+        if ($request->boolean('present_form')) {
+            $this->lifecycle->syncPastParticipants($event, $request->input('present_ids', []), $request->user());
         }
         Cache::forget('home.v1.ro');
         Cache::forget('home.v1.hu');
@@ -155,6 +202,9 @@ class EventController extends Controller
         if ($event->status !== EventStatus::Completed) {
             return back()->with('error', __('Workflow-ul post-eveniment rulează doar pentru evenimente încheiate.'));
         }
+        if ($event->archived_at) {
+            return back()->with('error', __('Ediție din arhivă (adăugată retroactiv): nu se trimit mesajele de după târg.'));
+        }
         $r = $workflow->run($event);
 
         return back()->with('success', __('Workflow post-eveniment: :p producători, :v vizitatori, :r cereri de recenzie, :t task-uri.', [
@@ -210,6 +260,9 @@ class EventController extends Controller
             'registration_end' => ['nullable', 'date', 'after_or_equal:registration_start'],
             'max_producers' => ['nullable', 'integer', 'min:1', 'max:1000'],
             'edition' => ['nullable', 'integer', 'min:1', 'max:9999'],
+            'present_form' => ['nullable', 'boolean'],
+            'present_ids' => ['nullable', 'array', 'max:500'],
+            'present_ids.*' => ['integer', 'exists:producers,id'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.config('autentik.uploads.image_max_kb')],
         ]);
     }

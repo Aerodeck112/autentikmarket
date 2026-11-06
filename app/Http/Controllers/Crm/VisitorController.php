@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Crm;
 
 use App\Enums\ConsentType;
 use App\Enums\Language;
+use App\Enums\ProducerStatus;
 use App\Enums\RegistrationStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Http\Controllers\Controller;
@@ -290,7 +291,11 @@ class VisitorController extends Controller
 
     protected function producerOptions(): array
     {
-        return Producer::approved()->orderBy('brand_name')->pluck('brand_name', 'id')->all();
+        // Aprobați + cei prezenți la o ediție (inclusiv adăugați retroactiv la edițiile trecute).
+        return Producer::query()
+            ->where(fn ($q) => $q->where('status', ProducerStatus::Approved->value)
+                ->orWhereHas('registrations', fn ($r) => $r->where('status', RegistrationStatus::Approved->value)))
+            ->orderBy('brand_name')->pluck('brand_name', 'id')->all();
     }
 
     /** event_id → producătorii aprobați la acea ediție (evidențiați în formular). */
