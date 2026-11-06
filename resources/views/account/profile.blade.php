@@ -7,8 +7,8 @@
             <div class="grid gap-4 sm:grid-cols-2">
                 <x-input name="first_name" :label="__('Prenume')" :value="$user->first_name" required />
                 <x-input name="last_name" :label="__('Nume')" :value="$user->last_name" required />
-                <x-input name="email" type="email" :label="__('E-mail')" :value="$user->email" required />
-                <x-input name="phone" :label="__('Telefon')" :value="$user->phone" />
+                <x-input name="email" type="email" :label="__('E-mail')" :value="$user->email" />
+                <x-input name="phone" :label="__('Telefon')" :value="$user->phone" :help="__('Te poți autentifica și cu numărul de telefon.')" />
                 <x-input name="city" :label="__('Localitate')" :value="$user->city" class="sm:col-span-2" />
             </div>
             <x-select name="preferred_language" :label="__('Limba de comunicare')" :options="['ro' => 'Română', 'hu' => 'Magyar']" :value="$user->preferredLanguage()->value" :help="__('Toate mesajele automate îți vor fi trimise în această limbă.')" required />

@@ -54,6 +54,7 @@
                 <div x-show="open" x-cloak @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-line bg-white py-1 text-sm shadow-[var(--shadow-lift)]">
                     @if ($user->producer)<a href="{{ route('producer.dashboard') }}" class="block px-4 py-2 hover:bg-cream">{{ __('Zona producător') }}</a>@endif
                     <a href="{{ route('account.index') }}" class="block px-4 py-2 hover:bg-cream">{{ __('Cardul meu Autentik') }}</a>
+                    <a href="{{ route('account.profile') }}" class="block px-4 py-2 hover:bg-cream">{{ __('Contul meu (date și parolă)') }}</a>
                     @can('checkin.perform')<a href="{{ route('staff.index') }}" class="block px-4 py-2 hover:bg-cream">{{ __('Staff check-in') }}</a>@endcan
                     @can('crm.access')<a href="{{ route('crm.dashboard') }}" class="block px-4 py-2 hover:bg-cream">CRM</a>@endcan
                     <a href="{{ route('account.notifications') }}" class="block px-4 py-2 hover:bg-cream">{{ __('Mesaje') }}</a>
@@ -65,7 +66,7 @@
 </header>
 
 <main class="container-site py-6 sm:py-10">
-    @unless ($user->hasVerifiedEmail())
+    @unless ($user->hasVerifiedEmail() || ! $user->email)
         <div class="mb-5 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:flex-row sm:items-center sm:justify-between">
             <span>{{ __('Te rugăm să confirmi adresa de e-mail. Unele funcții (tombole, recenzii, trimitere spre verificare) necesită confirmarea.') }}</span>
             <form method="POST" action="{{ route('verification.send') }}">@csrf<button class="btn-ghost btn-sm">{{ __('Retrimite e-mailul') }}</button></form>

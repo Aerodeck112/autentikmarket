@@ -30,20 +30,21 @@ class ProfileController extends Controller
         $data = $request->validate([
             'first_name' => ['required', 'string', 'max:100'],
             'last_name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'max:40', 'regex:/^[0-9 +().-]{6,40}$/'],
+            'email' => ['nullable', 'required_without:phone', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => ['nullable', 'required_without:email', 'string', 'max:40', 'regex:/^[0-9 +().-]{6,40}$/'],
             'city' => ['nullable', 'string', 'max:120'],
             'preferred_language' => ['required', Rule::enum(Language::class)],
         ]);
 
-        $emailChanged = strtolower($data['email']) !== $user->email;
-        $user->fill($data + ['email' => strtolower($data['email'])]);
+        $email = isset($data['email']) ? strtolower($data['email']) : null;
+        $emailChanged = $email !== $user->email;
+        $user->fill(['email' => $email] + $data);
         if ($emailChanged) {
             $user->email_verified_at = null;
         }
         $user->save();
         $request->session()->put('locale', $user->preferredLanguage()->value);
-        if ($emailChanged) {
+        if ($emailChanged && $email) {
             $user->sendEmailVerificationNotification();
         }
 

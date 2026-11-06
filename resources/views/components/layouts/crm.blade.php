@@ -57,6 +57,7 @@
         @endcan
     </nav>
     <div class="border-t border-white/10 p-3 text-xs">
+        <a href="{{ route('crm.me') }}" class="mb-1 block rounded-lg px-3 py-2 hover:bg-white/5">👤 {{ __('Contul meu') }}</a>
         <a href="{{ route('staff.index') }}" class="mb-1 block rounded-lg px-3 py-2 hover:bg-white/5">📱 {{ __('Deschide Staff PWA') }}</a>
         <a href="{{ lroute('home') }}" target="_blank" class="block rounded-lg px-3 py-2 hover:bg-white/5">↗ {{ __('Vezi site-ul') }}</a>
     </div>
@@ -78,7 +79,7 @@
                     <a href="{{ route('language.switch', $loc) }}" @class(['rounded-full px-2.5 py-1', 'bg-forest text-cream' => app()->getLocale() === $loc, 'text-ink-soft' => app()->getLocale() !== $loc])>{{ $lbl }}</a>
                 @endforeach
             </div>
-            <span class="hidden text-sm text-ink-soft md:inline">{{ $user->name }}</span>
+            <a href="{{ route('crm.me') }}" class="hidden text-sm text-ink-soft hover:text-clay md:inline" title="{{ __('Contul meu') }}">{{ $user->name }}</a>
             <form method="POST" action="{{ route('logout') }}">@csrf<button class="btn-ghost btn-sm">{{ __('Ieșire') }}</button></form>
         </div>
     </header>

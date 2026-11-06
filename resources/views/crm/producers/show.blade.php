@@ -32,7 +32,13 @@
                             <p class="mt-4 rounded-xl border border-line p-4 text-sm"><span class="font-semibold">{{ __('Producătorul nu are cont pe platformă.') }}</span><br>
                                 <span class="text-xs text-ink-soft">{{ __('Nu are e-mail. Completează adresa din „Editează”: la salvare primește automat invitația pe platformă.') }}</span></p>
                         @endif
-                    @elseif (! $producer->user->last_login_at)
+                    @endif
+                    @if ($producer->user)
+                        @can('users.manage')
+                            <a href="{{ route('crm.users.edit', $producer->user) }}" class="btn-ghost btn-sm mt-3">🔑 {{ __('Contul utilizatorului: date, parolă, link de acces') }}</a>
+                        @endcan
+                    @endif
+                    @if ($producer->user && ! $producer->user->last_login_at && $producer->user->email)
                         <form method="POST" action="{{ route('crm.producers.invite', $producer) }}" class="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-line p-4 text-sm">@csrf
                             <span>{{ __('Contul :e nu a fost activat încă.', ['e' => $producer->user->email]) }}</span>
                             <button class="btn-ghost btn-sm">{{ __('Retrimite invitația') }}</button>
@@ -91,6 +97,59 @@
                     @endforelse
                     </tbody>
                 </table>
+                @can('producers.manage')
+                    <details class="border-t border-line p-5" @if ($errors->has('file') && old('type')) open @endif>
+                        <summary class="cursor-pointer text-sm font-semibold">+ {{ __('Încarcă un document în contul producătorului') }}</summary>
+                        <form method="POST" action="{{ route('crm.producers.documents.store', $producer) }}" enctype="multipart/form-data" class="mt-3 grid gap-3 sm:grid-cols-2">@csrf
+                            <x-select name="type" :label="__('Tip')" :options="\App\Enums\DocumentType::options()" required />
+                            <x-input name="title" :label="__('Titlu (opțional)')" />
+                            <x-input name="expires_at" type="date" :label="__('Expiră la (opțional)')" />
+                            <x-input name="file" type="file" :label="__('Fișier (PDF, JPG, PNG)')" accept=".pdf,.jpg,.jpeg,.png" required />
+                            <p class="text-xs text-ink-soft sm:col-span-2">{{ __('Documentul încărcat de voi intră direct ca acceptat și apare și în contul producătorului.') }}</p>
+                            <div class="sm:col-span-2"><button class="btn-primary btn-sm">{{ __('Încarcă documentul') }}</button></div>
+                        </form>
+                    </details>
+                @endcan
+            </div>
+
+            {{-- IMAGINI (logo, copertă, galerie) --}}
+            <div class="card card-pad">
+                <h2 class="text-xl">{{ __('Imagini') }}</h2>
+                <div class="mt-3 grid gap-4 sm:grid-cols-2">
+                    @foreach (['logo' => [__('Logo'), $producer->logoUrl()], 'cover' => [__('Copertă'), $producer->coverUrl()]] as $kind => [$label, $url])
+                        <div>
+                            <p class="field-label">{{ $label }}</p>
+                            @if ($url)
+                                <img src="{{ $url }}" alt="" class="h-28 w-full rounded-xl border border-line object-cover">
+                                @can('producers.manage')
+                                    <form method="POST" action="{{ route('crm.producers.media.destroy', [$producer, $kind]) }}" class="mt-1" onsubmit="return confirm('{{ __('Ștergi imaginea?') }}')">@csrf @method('DELETE')<button class="text-xs text-red-700 hover:underline">{{ __('Șterge') }}</button></form>
+                                @endcan
+                            @else
+                                <p class="flex h-28 items-center justify-center rounded-xl border border-dashed border-line text-xs text-ink-soft">{{ __('fără imagine') }}</p>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+                <p class="field-label mt-4">{{ __('Galerie') }} ({{ $producer->gallery->count() }}/12)</p>
+                <div class="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                    @forelse ($producer->gallery as $m)
+                        <div class="relative">
+                            <img src="{{ $m->thumbUrl() }}" alt="" class="aspect-square w-full rounded-lg object-cover">
+                            @can('producers.manage')
+                                <form method="POST" action="{{ route('crm.producers.media.destroy', [$producer, $m->id]) }}" class="absolute right-1 top-1" onsubmit="return confirm('{{ __('Ștergi imaginea?') }}')">@csrf @method('DELETE')<button class="rounded-full bg-white/90 px-1.5 text-xs text-red-700" aria-label="{{ __('Șterge') }}">✕</button></form>
+                            @endcan
+                        </div>
+                    @empty
+                        <p class="col-span-full text-xs text-ink-soft">{{ __('Nicio fotografie.') }}</p>
+                    @endforelse
+                </div>
+                @can('producers.manage')
+                    <form method="POST" action="{{ route('crm.producers.media.store', $producer) }}" enctype="multipart/form-data" class="mt-4 flex flex-wrap items-end gap-2 border-t border-line pt-4">@csrf
+                        <x-select name="kind" :label="__('Încarcă')" :options="['gallery' => __('Fotografie în galerie'), 'logo' => __('Logo'), 'cover' => __('Copertă')]" class="w-48" />
+                        <x-input name="file" type="file" :label="__('Imagine (JPG, PNG, WEBP, min. 200×200)')" accept="image/*" required class="min-w-0 flex-1" />
+                        <button class="btn-primary btn-sm">{{ __('Încarcă') }}</button>
+                    </form>
+                @endcan
             </div>
 
             <div class="card overflow-x-auto">

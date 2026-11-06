@@ -6,7 +6,7 @@ use App\Enums\ProducerStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Media;
 use App\Models\ProducerCategory;
-use App\Support\Uploads;
+use App\Services\Producers\ProducerFiles;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -65,36 +65,10 @@ class ProfileController extends Controller
         return back()->with('success', __('Profilul a fost salvat.'));
     }
 
-    public function uploadMedia(Request $request): RedirectResponse
+    public function uploadMedia(Request $request, ProducerFiles $files): RedirectResponse
     {
-        $producer = $request->user()->producer;
-        $request->validate([
-            'kind' => ['required', 'in:logo,cover,gallery'],
-            'file' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.config('autentik.uploads.image_max_kb'), 'dimensions:min_width=200,min_height=200'],
-        ]);
-        $kind = $request->input('kind');
-        $path = Uploads::storeImage($request->file('file'), "producers/{$producer->id}");
-
-        if ($kind === 'gallery') {
-            if ($producer->gallery()->count() >= 12) {
-                Storage::disk('public')->delete($path);
-
-                return back()->with('error', __('Galeria poate avea maximum 12 fotografii.'));
-            }
-            $size = @getimagesize(Storage::disk('public')->path($path)) ?: [null, null];
-            $producer->gallery()->create([
-                'collection' => 'gallery', 'disk' => 'public', 'path' => $path,
-                'mime' => $request->file('file')->getMimeType(), 'size' => $request->file('file')->getSize(),
-                'width' => $size[0], 'height' => $size[1], 'uploaded_by' => $request->user()->id,
-                'sort_order' => $producer->gallery()->count() + 1,
-            ]);
-        } else {
-            $column = $kind.'_path';
-            if ($producer->$column) {
-                Storage::disk('public')->delete($producer->$column);
-            }
-            $producer->forceFill([$column => $path])->save();
-        }
+        $request->validate(ProducerFiles::imageRules());
+        $files->storeImage($request->user()->producer, $request->input('kind'), $request->file('file'), $request->user());
 
         return back()->with('success', __('Imaginea a fost încărcată.'));
     }

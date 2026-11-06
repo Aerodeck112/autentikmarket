@@ -2,16 +2,13 @@
 
 namespace App\Http\Controllers\Producer;
 
-use App\Enums\DocumentType;
 use App\Enums\ProducerStatus;
 use App\Http\Controllers\Controller;
 use App\Models\ProducerDocument;
+use App\Services\Producers\ProducerFiles;
 use App\Services\Producers\ProducerWorkflow;
-use App\Support\Uploads;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class DocumentController extends Controller
@@ -30,32 +27,10 @@ class DocumentController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, ProducerFiles $files): RedirectResponse
     {
-        $producer = $request->user()->producer;
-        $request->validate([
-            'type' => ['required', Rule::enum(DocumentType::class)],
-            'title' => ['nullable', 'string', 'max:200'],
-            'expires_at' => ['nullable', 'date', 'after:today'],
-            'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'mimetypes:application/pdf,image/jpeg,image/png', 'max:'.config('autentik.uploads.document_max_kb')],
-        ]);
-        if ($producer->documents()->count() >= 40) {
-            return back()->with('error', __('Ai atins numărul maxim de documente.'));
-        }
-
-        $file = $request->file('file');
-        $path = Uploads::storePrivate($file, "producer-documents/{$producer->id}");
-        $type = DocumentType::from($request->input('type'));
-
-        $producer->documents()->create([
-            'type' => $type,
-            'title' => $request->input('title') ?: $type->label(),
-            'path' => $path,
-            'original_name' => Uploads::cleanName($file->getClientOriginalName()),
-            'mime' => $file->getMimeType(),
-            'size' => $file->getSize(),
-            'expires_at' => $request->input('expires_at'),
-        ]);
+        $data = $request->validate(ProducerFiles::documentRules());
+        $files->storeDocument($request->user()->producer, $data, $request->file('file'));
 
         return back()->with('success', __('Documentul a fost încărcat.'));
     }
@@ -67,8 +42,7 @@ class DocumentController extends Controller
         if ($document->status === 'accepted' && $producer->status === ProducerStatus::Approved) {
             return back()->with('error', __('Documentele acceptate nu pot fi șterse după aprobare. Contactează organizatorii.'));
         }
-        Storage::disk('private')->delete($document->path);
-        $document->delete();
+        app(ProducerFiles::class)->deleteDocument($document);
 
         return back()->with('success', __('Documentul a fost șters.'));
     }

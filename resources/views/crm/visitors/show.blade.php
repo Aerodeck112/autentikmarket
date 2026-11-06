@@ -33,6 +33,11 @@
                     </form>
                 @endif
             @endcan
+            @can('users.manage')
+                @if (! $visitor->isSuperAdmin() || auth()->user()->isSuperAdmin())
+                    <a href="{{ route('crm.users.edit', $visitor) }}" class="btn-ghost btn-sm w-full">🔑 {{ __('Cont: parolă, activare, link de acces') }}</a>
+                @endif
+            @endcan
             <div class="card card-pad">
                 <h2 class="text-lg">{{ __('Consimțăminte (GDPR)') }}</h2>
                 <ul class="mt-2 space-y-1 text-xs">

@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Services\Accounts\InvitationService;
 use App\Services\AuditLogger;
 use App\Services\Export\TableExporter;
+use App\Services\Producers\ProducerFiles;
 use App\Services\Producers\ProducerWorkflow;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -264,6 +265,43 @@ class ProducerController extends Controller
         $ok = $producer->fresh()->user_id !== null;
 
         return back()->with($ok ? 'success' : 'error', $message ?? __('Invitația nu a putut fi trimisă.'));
+    }
+
+    /** Organizatorul încarcă logo / copertă / fotografii în contul producătorului. */
+    public function uploadMedia(Request $request, Producer $producer, ProducerFiles $files): RedirectResponse
+    {
+        $request->validate(ProducerFiles::imageRules());
+        $files->storeImage($producer, $request->input('kind'), $request->file('file'), $request->user());
+        AuditLogger::log('producer.media_uploaded_by_admin', $producer, [], ['kind' => $request->input('kind')]);
+
+        return back()->with('success', __('Imaginea a fost încărcată.'));
+    }
+
+    public function deleteMedia(Producer $producer, string $media, ProducerFiles $files): RedirectResponse
+    {
+        $files->deleteImage($producer, $media);
+        AuditLogger::log('producer.media_deleted_by_admin', $producer, [], ['media' => $media]);
+
+        return back()->with('success', __('Imaginea a fost ștearsă.'));
+    }
+
+    /** Document încărcat de organizator (ex. adus pe hârtie): intră direct ca acceptat. */
+    public function uploadDocument(Request $request, Producer $producer, ProducerFiles $files): RedirectResponse
+    {
+        $data = $request->validate(ProducerFiles::documentRules());
+        $doc = $files->storeDocument($producer, $data, $request->file('file'), $request->user());
+        AuditLogger::log('producer_document.uploaded_by_admin', $doc, [], ['type' => $doc->type]);
+
+        return back()->with('success', __('Documentul a fost încărcat.'));
+    }
+
+    public function deleteDocument(Producer $producer, ProducerDocument $document, ProducerFiles $files): RedirectResponse
+    {
+        abort_unless($document->producer_id === $producer->id, 404);
+        AuditLogger::log('producer_document.deleted_by_admin', $document, ['title' => $document->title], []);
+        $files->deleteDocument($document);
+
+        return back()->with('success', __('Documentul a fost șters.'));
     }
 
     public function edit(Producer $producer): View

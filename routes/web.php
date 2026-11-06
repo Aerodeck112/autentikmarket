@@ -184,6 +184,9 @@ Route::middleware(['auth', 'can:checkin.perform'])->prefix('staff')->name('staff
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->group(function () {
+    Route::get('/me', [Crm\AccountController::class, 'edit'])->name('me');
+    Route::put('/me', [Crm\AccountController::class, 'update'])->name('me.update');
+    Route::put('/me/password', [Crm\AccountController::class, 'password'])->name('me.password');
     Route::get('/', [Crm\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/search', [Crm\SearchController::class, 'index'])->name('search');
 
@@ -240,6 +243,10 @@ Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->grou
         Route::get('/producers/export', [Crm\ProducerController::class, 'export'])->middleware('can:exports.run')->name('producers.export');
         Route::get('/producers/create', [Crm\ProducerController::class, 'create'])->middleware('can:producers.manage')->name('producers.create');
         Route::post('/producers', [Crm\ProducerController::class, 'store'])->middleware('can:producers.manage')->name('producers.store');
+        Route::post('/producers/{producer}/media', [Crm\ProducerController::class, 'uploadMedia'])->middleware('can:producers.manage')->name('producers.media.store');
+        Route::delete('/producers/{producer}/media/{media}', [Crm\ProducerController::class, 'deleteMedia'])->middleware('can:producers.manage')->name('producers.media.destroy');
+        Route::post('/producers/{producer}/documents', [Crm\ProducerController::class, 'uploadDocument'])->middleware('can:producers.manage')->name('producers.documents.store');
+        Route::delete('/producers/{producer}/documents/{document}', [Crm\ProducerController::class, 'deleteDocument'])->middleware('can:producers.manage')->name('producers.documents.destroy');
         Route::post('/producers/{producer}/invite', [Crm\ProducerController::class, 'invite'])->middleware(['can:producers.manage', 'throttle:forms'])->name('producers.invite');
         Route::get('/producers/{producer}', [Crm\ProducerController::class, 'show'])->name('producers.show');
         Route::get('/producers/{producer}/edit', [Crm\ProducerController::class, 'edit'])->middleware('can:producers.manage')->name('producers.edit');
@@ -356,6 +363,9 @@ Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->grou
     Route::middleware('can:users.manage')->group(function () {
         Route::get('/users', [Crm\UserController::class, 'index'])->name('users.index');
         Route::put('/users/{user}/roles', [Crm\UserController::class, 'roles'])->name('users.roles');
+        Route::get('/users/{user}/edit', [Crm\UserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{user}', [Crm\UserController::class, 'update'])->name('users.update');
+        Route::post('/users/{user}/password-link', [Crm\UserController::class, 'sendPasswordLink'])->middleware('throttle:forms')->name('users.password-link');
     });
 
     // SISTEM
