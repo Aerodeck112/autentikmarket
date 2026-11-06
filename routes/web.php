@@ -255,6 +255,7 @@ Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->grou
         Route::post('/producers/{producer}/document-requests', [Crm\ProducerController::class, 'requestDocuments'])->middleware('can:producers.approve')->name('producers.document-requests');
         Route::post('/producers/{producer}/documents/{document}/review', [Crm\ProducerController::class, 'reviewDocument'])->middleware('can:producers.approve')->name('producers.documents.review');
         Route::post('/producers/{producer}/contract', [Crm\ContractController::class, 'generate'])->middleware('can:contracts.manage')->name('producers.contract');
+        Route::post('/producers/{producer}/contracts/upload', [Crm\ContractController::class, 'upload'])->middleware('can:contracts.manage')->name('producers.contracts.upload');
     });
     Route::resource('categories', Crm\CategoryController::class)->except(['show'])->middleware('can:producers.manage');
 

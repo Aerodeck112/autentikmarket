@@ -61,13 +61,28 @@ class SettingsController extends Controller
             'reservations_hold_minutes' => ['required', 'integer', 'min:5', 'max:120'],
             'mail_reply_to' => ['nullable', 'email', 'max:255'],
             'contracts_number_prefix' => ['required', 'string', 'max:10', 'alpha_num'],
+            'documents_contract_format' => ['nullable', 'string', 'max:60', 'regex:/\{nr(:\d)?\}/', 'regex:/^[A-Za-z0-9{}:\/._ -]+$/'],
+            'documents_annex_format' => ['nullable', 'string', 'max:60', 'regex:/\{nr(:\d)?\}/', 'regex:/^[A-Za-z0-9{}:\/._ -]+$/'],
+            'documents_contract_next' => ['nullable', 'integer', 'min:1', 'max:9999999'],
+            'documents_annex_next' => ['nullable', 'integer', 'min:1', 'max:9999999'],
+            'documents_reset_yearly' => ['nullable', 'boolean'],
             'seo_default_description_ro' => ['nullable', 'string', 'max:255'],
             'seo_default_description_hu' => ['nullable', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
             'hero' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:'.config('autentik.uploads.image_max_kb')],
             'remove_logo' => ['nullable', 'boolean'],
             'remove_hero' => ['nullable', 'boolean'],
+        ], [
+            'documents_contract_format.regex' => __('Formatul trebuie să conțină {nr} și doar litere, cifre, / - . _ și {prefix} {an} {nr} {nr:4}.'),
+            'documents_annex_format.regex' => __('Formatul trebuie să conțină {nr} și doar litere, cifre, / - . _ și {prefix} {an} {nr} {nr:4}.'),
         ]);
+        $data['documents_reset_yearly'] = $request->boolean('documents_reset_yearly') ? '1' : '0';
+        foreach (['contract', 'annex'] as $kind) {
+            // Numărul setat de mână pornește numărătoarea din anul curent.
+            if (! empty($data["documents_{$kind}_next"])) {
+                $data["documents_{$kind}_year"] = (string) now()->year;
+            }
+        }
 
         $map = [];
         foreach ($data as $k => $v) {

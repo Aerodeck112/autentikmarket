@@ -36,6 +36,9 @@ class Settings
         'brand.hero_path' => '',
         'mail.reply_to' => '',
         'contracts.number_prefix' => 'AM',
+        'documents.contract_format' => '{prefix}-C-{an}-{nr:4}',
+        'documents.annex_format' => '{prefix}-A-{an}-{nr:4}',
+        'documents.reset_yearly' => '1',
         'seo.default_description_ro' => 'Târg lunar de producători locali și artizani în Târgu Mureș. Produse autentice, direct de la cei care le fac.',
         'seo.default_description_hu' => 'Havi termelői és kézműves vásár Marosvásárhelyen. Autentikus termékek, közvetlenül a készítőktől.',
     ];

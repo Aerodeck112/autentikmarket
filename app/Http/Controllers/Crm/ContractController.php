@@ -7,10 +7,12 @@ use App\Models\Annex;
 use App\Models\Contract;
 use App\Models\Producer;
 use App\Services\AuditLogger;
+use App\Services\Documents\DocumentNumbering;
 use App\Services\Documents\DocumentService;
 use App\Support\Uploads;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class ContractController extends Controller
@@ -33,6 +35,35 @@ class ContractController extends Controller
         $contract = $documents->generateContract($producer, $request->user());
 
         return back()->with('success', __('Contractul :n a fost generat.', ['n' => $contract->number]));
+    }
+
+    /** Contract existent (semnat pe hârtie / din registrul vechi) încărcat ca PDF, cu numărul lui. */
+    public function upload(Request $request, Producer $producer, DocumentNumbering $numbering): RedirectResponse
+    {
+        $data = $request->validate([
+            'number' => ['required', 'string', 'max:40', 'unique:contracts,number'],
+            'signed_at' => ['nullable', 'date', 'before_or_equal:today'],
+            'status' => ['required', 'in:signed,sent,generated'],
+            'file' => ['required', 'file', 'mimes:pdf', 'mimetypes:application/pdf', 'max:'.config('autentik.uploads.document_max_kb')],
+        ], ['number.unique' => __('Există deja un contract cu acest număr.')]);
+
+        $path = Uploads::storePrivate($request->file('file'), "contracts/{$producer->id}", ['pdf']);
+        $date = isset($data['signed_at']) ? Carbon::parse($data['signed_at']) : now();
+        $contract = $producer->contracts()->create([
+            'number' => trim($data['number']),
+            'language' => $producer->preferredLanguage()->value,
+            'path' => $path,
+            'signed_path' => $data['status'] === 'signed' ? $path : null,
+            'status' => $data['status'],
+            'signed_at' => $data['status'] === 'signed' ? $date : null,
+            'generated_at' => $date,
+            'generated_by' => $request->user()->id,
+            'data_snapshot' => ['source' => 'upload', 'original_name' => Uploads::cleanName($request->file('file')->getClientOriginalName())],
+        ]);
+        $numbering->registerExisting('contract', $contract->number);
+        AuditLogger::log('contract.uploaded', $contract, [], ['number' => $contract->number, 'producer_id' => $producer->id]);
+
+        return back()->with('success', __('Contractul :n a fost încărcat.', ['n' => $contract->number]));
     }
 
     public function status(Request $request, Contract $contract): RedirectResponse

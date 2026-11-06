@@ -47,6 +47,9 @@ class FileController extends Controller
     {
         abort_unless(Storage::disk('private')->exists($path), 404);
 
+        // Numere ca „125/2026” → „125-2026” (în numele fișierului nu sunt permise / și \).
+        $name = str_replace(['/', '\\'], '-', $name);
+
         return Storage::disk('private')->response($path, $name, [
             'Content-Type' => $mime,
             'X-Content-Type-Options' => 'nosniff',

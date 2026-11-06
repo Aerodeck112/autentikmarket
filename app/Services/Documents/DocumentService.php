@@ -13,7 +13,6 @@ use App\Services\AuditLogger;
 use App\Services\Notifications\NotificationService;
 use App\Support\Settings;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -36,7 +35,7 @@ class DocumentService
         'org_name', 'org_legal_name', 'org_cui', 'org_representative',
     ];
 
-    public function __construct(protected NotificationService $notifications) {}
+    public function __construct(protected NotificationService $notifications, protected DocumentNumbering $numbering) {}
 
     public function activeTemplate(string $type, string $language): ?DocumentTemplate
     {
@@ -54,7 +53,7 @@ class DocumentService
         $template = $this->activeTemplate('contract', $lang)
             ?? throw new BusinessRuleException(__('Nu există un template de contract activ.'), 'no_template');
 
-        $contract = $this->withUniqueNumber('C', function (string $number) use ($producer, $template, $lang, $admin) {
+        $contract = $this->numbering->next('contract', function (string $number) use ($producer, $template, $lang, $admin) {
             $data = $this->producerData($producer, $lang) + $this->orgData() + [
                 'contract_number' => $number,
                 'date' => format_date_local(now(), false, $lang),
@@ -108,7 +107,7 @@ class DocumentService
             ($reg?->needs_electricity || $reservation->slot->has_electricity) ? ($lang === 'hu' ? 'áram' : 'electricitate') : null,
         ]);
 
-        $annex = $this->withUniqueNumber('A', function (string $number) use ($reservation, $producer, $event, $lang, $template, $contract, $reg, $yes, $no, $services, $admin) {
+        $annex = $this->numbering->next('annex', function (string $number) use ($reservation, $producer, $event, $lang, $template, $contract, $reg, $yes, $no, $services, $admin) {
             $data = $this->producerData($producer, $lang) + $this->orgData() + [
                 'annex_number' => $number,
                 'contract_number' => $contract?->number ?? '—',
@@ -177,23 +176,6 @@ class DocumentService
         $html = view('pdf.document', ['title' => $title, 'body' => $body, 'lang' => $lang])->render();
         $pdf = Pdf::loadHTML($html)->setPaper('a4');
         Storage::disk('private')->put($path, $pdf->output());
-    }
-
-    protected function withUniqueNumber(string $kind, callable $create)
-    {
-        $prefix = Settings::get('contracts.number_prefix', 'AM');
-        $year = now()->year;
-        for ($attempt = 0; $attempt < 5; $attempt++) {
-            $model = $kind === 'C' ? Contract::class : Annex::class;
-            $seq = $model::where('number', 'like', "{$prefix}-{$kind}-{$year}-%")->count() + 1 + $attempt;
-            $number = sprintf('%s-%s-%d-%04d', $prefix, $kind, $year, $seq);
-            try {
-                return $create($number);
-            } catch (UniqueConstraintViolationException) {
-                continue;
-            }
-        }
-        throw new BusinessRuleException(__('Nu s-a putut genera un număr unic de document.'), 'number_conflict');
     }
 
     protected function producerData(Producer $p, string $lang): array

@@ -71,6 +71,18 @@
             <h2 class="text-xl">{{ __('Rezervări & documente') }}</h2>
             <x-input name="reservations_hold_minutes" type="number" :label="__('Durata hold-ului temporar pe stand (minute)')" :value="setting('reservations.hold_minutes')" required />
             <x-input name="contracts_number_prefix" :label="__('Prefix numerotare contracte/anexe')" :value="setting('contracts.number_prefix')" required />
+            @php $numbering = app(\App\Services\Documents\DocumentNumbering::class); @endphp
+            <div class="rounded-xl border border-line p-4 space-y-3">
+                <p class="text-sm font-semibold">{{ __('Numerotare (în continuarea registrului existent)') }}</p>
+                <p class="text-xs text-ink-soft">{{ __('În format: {nr} = număr, {nr:4} = număr pe 4 cifre (0125), {an} = anul, {prefix} = prefixul de mai sus. Exemple: „{nr}/{an}” → 125/2026; „{prefix}-C-{an}-{nr:4}” → AM-C-2026-0125.') }}</p>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <x-input name="documents_contract_format" :label="__('Format număr contract')" :value="\App\Services\Documents\DocumentNumbering::formatFor('contract')" required />
+                    <x-input name="documents_contract_next" type="number" min="1" :label="__('Următorul număr de contract')" :value="$numbering->peek('contract')" :help="__('Următorul contract: :n', ['n' => $numbering->format('contract', $numbering->peek('contract'))])" />
+                    <x-input name="documents_annex_format" :label="__('Format număr anexă')" :value="\App\Services\Documents\DocumentNumbering::formatFor('annex')" required />
+                    <x-input name="documents_annex_next" type="number" min="1" :label="__('Următorul număr de anexă')" :value="$numbering->peek('annex')" :help="__('Următoarea anexă: :n', ['n' => $numbering->format('annex', $numbering->peek('annex'))])" />
+                </div>
+                <x-checkbox name="documents_reset_yearly" :label="__('Numărătoarea repornește de la 1 în fiecare an')" :checked="setting('documents.reset_yearly', '1') === '1'" />
+            </div>
         </div>
         <div class="card card-pad space-y-4">
             <h2 class="text-xl">{{ __('Organizator (date pentru contracte)') }}</h2>

@@ -184,7 +184,19 @@
                 @can('contracts.manage')
                     @if ($producer->isApproved())
                         <form method="POST" action="{{ route('crm.producers.contract', $producer) }}" class="mt-4">@csrf<button class="btn-primary btn-sm">{{ __('Generează contract') }} ({{ strtoupper($producer->preferredLanguage()->value) }})</button></form>
+                        <p class="mt-1 text-xs text-ink-soft">{{ __('Număr următor') }}: {{ app(\App\Services\Documents\DocumentNumbering::class)->format('contract', app(\App\Services\Documents\DocumentNumbering::class)->peek('contract')) }}</p>
                     @endif
+                    <details class="mt-4 rounded-xl border border-line p-3" @if ($errors->has('number')) open @endif>
+                        <summary class="cursor-pointer text-sm font-semibold">+ {{ __('Încarcă contract existent (PDF)') }}</summary>
+                        <form method="POST" action="{{ route('crm.producers.contracts.upload', $producer) }}" enctype="multipart/form-data" class="mt-3 space-y-3">@csrf
+                            <x-input name="number" :label="__('Număr contract (ca în registrul vostru)')" required />
+                            <x-input name="signed_at" type="date" :label="__('Data')" />
+                            <x-select name="status" :label="__('Status')" :options="['signed' => __('Semnat'), 'sent' => __('Trimis'), 'generated' => __('Nesemnat încă')]" value="signed" />
+                            <x-input name="file" type="file" :label="__('Fișier PDF')" accept=".pdf,application/pdf" required />
+                            <p class="text-xs text-ink-soft">{{ __('Dacă numărul respectă formatul din Setări, numerotarea automată continuă după el.') }}</p>
+                            <button class="btn-ghost btn-sm">{{ __('Încarcă contractul') }}</button>
+                        </form>
+                    </details>
                 @endcan
             </div>
 
