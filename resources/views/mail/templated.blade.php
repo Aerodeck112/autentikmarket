@@ -32,6 +32,9 @@
             <tr><td style="padding:18px 28px 26px;border-top:1px solid #f0e6cc;font-size:12px;line-height:1.5;color:#5b6a5f">
                 {{ __('Autentik Market — târg lunar de producători și artizani.') }}<br>
                 <a href="{{ config('app.url') }}" style="color:#5b6a5f">{{ preg_replace('#^https?://#', '', config('app.url')) }}</a>
+                @if (! empty($unsubscribeUrl))
+                    <br>{{ __('Nu mai vrei să primești aceste e-mailuri?') }} <a href="{{ $unsubscribeUrl }}" style="color:#5b6a5f">{{ __('Dezabonare') }}</a>
+                @endif
             </td></tr>
         </table>
     </td></tr>

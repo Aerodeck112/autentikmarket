@@ -27,6 +27,7 @@
         [__('Contracte'), 'crm.contracts.index', 'contracts.manage', 'M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6'],
         [__('Task-uri'), 'crm.tasks.index', 'tasks.view', 'M9 11l3 3 8-8M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2h9'],
         [__('Blog'), 'crm.blog.index', 'blog.manage', 'M4 4h16v16H4zM8 8h8M8 12h8M8 16h5'],
+        [__('Campanii e-mail'), 'crm.campaigns.index', 'campaigns.manage', 'M3 7l9 6 9-6M4 5h16a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1z'],
         [__('Automatizări'), 'crm.automations.index', 'notifications.manage', 'M13 2L3 14h9l-1 8 10-12h-9z'],
         [__('Rapoarte'), 'crm.reports.index', 'reports.view', 'M4 20V10m6 10V4m6 16v-7m4 7H2'],
         [__('Actualizări'), 'crm.updates.index', 'system.update', 'M4 4v6h6M20 20v-6h-6M5 15a7 7 0 0012 3m2-9A7 7 0 007 6'],
@@ -43,7 +44,7 @@
     <nav class="flex-1 overflow-y-auto px-3 py-4 text-sm">
         @foreach ($nav as [$label, $route, $perm, $icon])
             @can($perm)
-                @php $active = request()->routeIs(Str::beforeLast($route, '.').'*') || request()->routeIs($route); @endphp
+                @php $section = Str::beforeLast($route, '.'); $active = request()->routeIs($route) || ($section !== 'crm' && request()->routeIs($section.'.*')); @endphp
                 <a href="{{ route($route) }}" @class(['mb-0.5 flex items-center gap-3 rounded-xl px-3 py-2 transition', 'bg-white/10 text-white' => $active, 'hover:bg-white/5 hover:text-white' => ! $active])>
                     <svg class="size-[18px] shrink-0 opacity-80" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="{{ $icon }}"/></svg>
                     {{ $label }}

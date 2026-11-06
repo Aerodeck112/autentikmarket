@@ -336,6 +336,22 @@ Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->grou
     });
 
     // Automatizări & notificări
+    Route::middleware('can:campaigns.manage')->prefix('campaigns')->name('campaigns.')->group(function () {
+        Route::get('/', [Crm\CampaignController::class, 'index'])->name('index');
+        Route::get('/create', [Crm\CampaignController::class, 'create'])->name('create');
+        Route::post('/', [Crm\CampaignController::class, 'store'])->name('store');
+        Route::put('/settings', [Crm\CampaignController::class, 'settings'])->name('settings');
+        Route::get('/{campaign}', [Crm\CampaignController::class, 'show'])->name('show');
+        Route::get('/{campaign}/edit', [Crm\CampaignController::class, 'edit'])->name('edit');
+        Route::put('/{campaign}', [Crm\CampaignController::class, 'update'])->name('update');
+        Route::delete('/{campaign}', [Crm\CampaignController::class, 'destroy'])->name('destroy');
+        Route::post('/{campaign}/test', [Crm\CampaignController::class, 'test'])->middleware('throttle:forms')->name('test');
+        Route::post('/{campaign}/start', [Crm\CampaignController::class, 'start'])->name('start');
+        Route::post('/{campaign}/pause', [Crm\CampaignController::class, 'pause'])->name('pause');
+        Route::post('/{campaign}/cancel', [Crm\CampaignController::class, 'cancel'])->name('cancel');
+        Route::post('/{campaign}/send-now', [Crm\CampaignController::class, 'sendNow'])->middleware('throttle:forms')->name('send-now');
+    });
+
     Route::middleware('can:notifications.manage')->group(function () {
         Route::get('/automations', [Crm\AutomationController::class, 'index'])->name('automations.index');
         Route::get('/automations/templates/{template}/edit', [Crm\AutomationController::class, 'edit'])->name('automations.edit');
@@ -382,6 +398,10 @@ Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->grou
         Route::post('/{update}/rollback', [Crm\UpdateController::class, 'rollback'])->name('rollback');
     });
 });
+
+// Dezabonare din e-mailurile de campanie (link semnat, fără cont).
+Route::get('/campaigns/unsubscribe/{recipient}', [Site\CampaignUnsubscribeController::class, 'show'])->middleware('signed')->name('campaigns.unsubscribe');
+Route::post('/campaigns/unsubscribe/{recipient}', [Site\CampaignUnsubscribeController::class, 'store'])->middleware('signed')->name('campaigns.unsubscribe.store');
 
 // Adrese /hu/... scrise cu cuvinte românești (și invers) → pagina corectă, nu 404.
 Route::fallback([Site\LocaleRedirectController::class, 'fallback']);

@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\Campaigns\CampaignService;
 use App\Support\QueueRunner;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -40,6 +41,9 @@ Schedule::call(fn () => Artisan::call('loyalty:expire-rewards'))->dailyAt('03:10
 // Mentenanță.
 Schedule::call(fn () => Artisan::call('queue:prune-failed', ['--hours' => 720]))->weekly()->name('prune-failed-jobs');
 Schedule::call(fn () => Artisan::call('auth:clear-resets'))->daily()->name('clear-password-resets');
+
+// Campanii e-mail: trimitere treptată, în limita pe oră din CRM (cel mult 15 s pe minut).
+Schedule::call(fn () => app(CampaignService::class)->tick(15))->everyMinute()->name('email-campaigns')->withoutOverlapping(5);
 
 // Coada de joburi (QUEUE_CONNECTION=database) — fără Supervisor. Ultima: rulează până la 45 s.
 Schedule::call(fn () => QueueRunner::run(45))->everyMinute()->name('queue-processing')->withoutOverlapping(5);

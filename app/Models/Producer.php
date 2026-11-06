@@ -41,6 +41,7 @@ class Producer extends Model implements HasPreferredLanguage
             'status_changed_at' => 'datetime',
             'approved_at' => 'datetime',
             'is_public' => 'boolean',
+            'campaigns_opt_out' => 'boolean',
         ];
     }
 

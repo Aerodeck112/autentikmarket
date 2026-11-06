@@ -34,6 +34,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'producer' => EnsureProducer::class,
         ]);
         $middleware->encryptCookies(except: ['locale']);
+        // Dezabonarea „dintr-un clic” (Gmail/Outlook) trimite POST fără token CSRF; linkul e semnat.
+        $middleware->validateCsrfTokens(except: ['campaigns/unsubscribe/*']);
         $middleware->redirectGuestsTo(fn (Request $request) => lroute('login'));
         $middleware->redirectUsersTo(fn (Request $request) => route('dashboard.redirect'));
         // Pașii Update Manager-ului rulează și în timpul maintenance mode (sunt protejați de auth + system.update).

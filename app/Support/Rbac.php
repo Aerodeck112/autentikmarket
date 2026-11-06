@@ -32,6 +32,7 @@ class Rbac
         'tasks.view' => ['tasks', 'Vizualizare task-uri', 'Feladatok megtekintése'],
         'tasks.manage' => ['tasks', 'Administrare task-uri', 'Feladatok kezelése'],
         'blog.manage' => ['content', 'Administrare blog', 'Blog kezelése'],
+        'campaigns.manage' => ['content', 'Campanii e-mail', 'E-mail kampányok'],
         'notifications.manage' => ['system', 'Automatizări & notificări', 'Automatizálások és értesítések'],
         'reports.view' => ['reports', 'Rapoarte & statistici', 'Jelentések és statisztikák'],
         'exports.run' => ['reports', 'Export CSV / XLSX', 'CSV / XLSX export'],
@@ -54,7 +55,7 @@ class Rbac
                 'crm.access', 'dashboard.view', 'events.view', 'events.manage', 'maps.manage', 'reservations.manage',
                 'producers.view', 'producers.manage', 'producers.approve', 'visitors.view', 'visitors.manage', 'checkin.perform',
                 'rewards.redeem', 'raffles.manage', 'raffles.validate', 'reviews.moderate', 'contracts.manage',
-                'tasks.view', 'tasks.manage', 'blog.manage', 'reports.view', 'exports.run',
+                'tasks.view', 'tasks.manage', 'blog.manage', 'reports.view', 'exports.run', 'campaigns.manage',
             ],
             // Administrator: tot, mai puțin instalarea actualizărilor.
             'admin' => array_values(array_diff($all, ['system.update'])),
