@@ -60,6 +60,7 @@ class RegisterController extends Controller
     {
         $data = $this->validateCommon($request, [
             'brand_name' => ['required', 'string', 'max:150'],
+            'county' => ['nullable', 'string', 'max:120'],
         ]);
 
         $user = DB::transaction(function () use ($data, $request) {
@@ -72,6 +73,7 @@ class RegisterController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'city' => $user->city,
+                'county' => $data['county'] ?? null,
                 // Limba producătorului = limba aleasă la înregistrare (modificabilă de admin).
                 'preferred_language' => $data['preferred_language'],
             ]);

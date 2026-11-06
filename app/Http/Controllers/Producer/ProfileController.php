@@ -42,6 +42,8 @@ class ProfileController extends Controller
             'iban' => ['nullable', 'string', 'max:40', 'regex:/^[A-Z]{2}[0-9]{2}[A-Z0-9 ]{10,32}$/i'],
             'bank_name' => ['nullable', 'string', 'max:120'],
             'producer_category_id' => ['nullable', 'exists:producer_categories,id'],
+            'category_ids' => ['nullable', 'array', 'max:20'],
+            'category_ids.*' => ['integer', 'exists:producer_categories,id'],
             'description_ro' => ['nullable', 'string', 'max:3000'],
             'description_hu' => ['nullable', 'string', 'max:3000'],
             'story_ro' => ['nullable', 'string', 'max:6000'],
@@ -55,8 +57,12 @@ class ProfileController extends Controller
         if ($data['brand_name'] !== $producer->brand_name) {
             $data['slug'] = $producer::uniqueSlug($data['brand_name'], $producer->id);
         }
+        unset($data['category_ids']);
         // Limba producătorului NU se schimbă de aici (o administrează CRM-ul / aleasă la înregistrare).
         $producer->update($data);
+        if ($request->boolean('categories_form')) {
+            $producer->syncCategories($request->input('category_ids', []));
+        }
 
         if ($producer->status === ProducerStatus::New) {
             $producer->forceFill(['status' => ProducerStatus::Incomplete, 'status_changed_at' => now()])->save();

@@ -8,7 +8,7 @@
     <div class="grid gap-6 xl:grid-cols-3">
         <div class="space-y-6 xl:col-span-2">
             <div class="card card-pad">
-                <div class="flex flex-wrap items-center gap-2"><x-status :status="$producer->status" /><x-lang-badge :lang="$producer->preferred_language" /><span class="text-sm text-ink-soft">{{ $producer->category?->name_ro }}</span></div>
+                <div class="flex flex-wrap items-center gap-2"><x-status :status="$producer->status" /><x-lang-badge :lang="$producer->preferred_language" /><span class="text-sm text-ink-soft">{{ $producer->categories->pluck('name_ro')->implode(', ') ?: $producer->category?->name_ro }}</span></div>
                 <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-3">
                     @foreach ([__('Denumire juridică') => $producer->legal_name, 'CUI' => $producer->cui, __('Reg. Com.') => $producer->trade_register_no, __('Reprezentant') => $producer->representative_name, __('Telefon') => $producer->phone, 'E-mail' => $producer->email, __('Adresă') => trim($producer->address.', '.$producer->city.', '.$producer->county, ', '), 'IBAN' => $producer->iban, __('Bancă') => $producer->bank_name, __('Cont utilizator') => $producer->user?->email, 'Autentik Shop' => $producer->shop_url, __('Interacțiuni clienți') => $interactions] as $k => $v)
                         <div><dt class="text-xs text-ink-soft">{{ $k }}</dt><dd class="break-words font-medium">{{ $v ?: '—' }}</dd></div>

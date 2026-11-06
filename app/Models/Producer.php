@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Storage;
@@ -51,6 +52,12 @@ class Producer extends Model implements HasPreferredLanguage
             $p->preferred_language ??= Language::default();
             if (empty($p->slug)) {
                 $p->slug = static::uniqueSlug($p->brand_name);
+            }
+        });
+        // Categoria principală face parte mereu și din lista de categorii.
+        static::saved(function (Producer $p) {
+            if ($p->producer_category_id && ($p->wasRecentlyCreated || $p->wasChanged('producer_category_id'))) {
+                $p->categories()->syncWithoutDetaching([$p->producer_category_id]);
             }
         });
     }
@@ -134,9 +141,43 @@ class Producer extends Model implements HasPreferredLanguage
         return $this->belongsTo(User::class);
     }
 
+    /** „Reghin, jud. Mureș” / „Reghin, Mureș megye” — localitatea și județul de unde vine producătorul. */
+    public function locationLabel(?string $locale = null): string
+    {
+        $county = trim((string) $this->county);
+        if ($county !== '' && ! preg_match('/^(jud\.?|județul|judetul)\s/iu', $county) && ! str_contains(mb_strtolower($county), 'megye')) {
+            $county = ($locale ?? app()->getLocale()) === 'hu' ? $county.' megye' : 'jud. '.$county;
+        }
+
+        return implode(', ', array_filter([trim((string) $this->city), $county]));
+    }
+
+    /** Categoria principală (afișată pe card). */
     public function category(): BelongsTo
     {
         return $this->belongsTo(ProducerCategory::class, 'producer_category_id');
+    }
+
+    /** Toate categoriile producătorului (inclusiv cea principală). */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(ProducerCategory::class, 'producer_category_producer')->orderBy('sort_order');
+    }
+
+    /**
+     * Salvează categoriile alese; cea principală rămâne aceeași dacă e încă bifată, altfel prima din listă.
+     *
+     * @param  array<int, int|string>  $ids
+     */
+    public function syncCategories(array $ids): void
+    {
+        $ids = ProducerCategory::whereIn('id', array_map('intval', $ids))->orderBy('sort_order')->pluck('id')->all();
+        $this->categories()->sync($ids);
+        $primary = in_array((int) $this->producer_category_id, $ids, true) ? (int) $this->producer_category_id : ($ids[0] ?? null);
+        if ($primary !== $this->producer_category_id) {
+            $this->forceFill(['producer_category_id' => $primary])->save();
+        }
+        $this->unsetRelation('categories')->unsetRelation('category');
     }
 
     public function approver(): BelongsTo

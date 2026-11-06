@@ -1,7 +1,7 @@
 {{-- Câmpurile fișei de producător: folosite la Producător nou și la Editează. --}}
         <div class="card card-pad grid gap-4 sm:grid-cols-2 lg:col-span-2">
             <x-input name="brand_name" :label="__('Denumire brand')" :value="$producer->brand_name" required />
-            <x-select name="producer_category_id" :label="__('Categorie')" :options="$categories->pluck('name_ro', 'id')->all()" :value="$producer->producer_category_id" placeholder="—" />
+            <x-category-checkboxes :categories="$categories" :selected="$producer->exists ? $producer->categories->pluck('id')->all() : []" :primary="$producer->producer_category_id" class="sm:col-span-2" />
             <x-input name="legal_name" :label="__('Denumire juridică')" :value="$producer->legal_name" />
             <x-input name="cui" label="CUI" :value="$producer->cui" />
             <x-input name="trade_register_no" :label="__('Nr. Registrul Comerțului')" :value="$producer->trade_register_no" />

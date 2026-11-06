@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\NotificationLog;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;

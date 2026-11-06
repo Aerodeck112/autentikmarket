@@ -1353,5 +1353,9 @@
     "Nu îți poți dezactiva propriul cont.": "A saját fiókodat nem tilthatod le.",
     "Cont: parolă, activare, link de acces": "Fiók: jelszó, aktiválás, hozzáférési link",
     "inactiv": "inaktív",
-    "Pentru a adăuga un membru al echipei: persoana își creează cont pe site (sau o adăugați ca cumpărător), apoi îi atribuiți rolul aici (alegeți „Toate conturile” și căutați-o). Cu „Editează” modificați datele oricărui cont, setați o parolă nouă sau trimiteți linkul de alegere a parolei.": "Csapattag hozzáadása: a személy fiókot hoz létre az oldalon (vagy vásárlóként adjátok hozzá), majd itt kiosztjátok a szerepkört (válasszátok a „Minden fiók” lehetőséget, és keressétek meg). A „Szerkesztés” gombbal bármely fiók adatait módosíthatjátok, új jelszót állíthattok be vagy elküldhetitek a jelszóválasztó linket."
+    "Pentru a adăuga un membru al echipei: persoana își creează cont pe site (sau o adăugați ca cumpărător), apoi îi atribuiți rolul aici (alegeți „Toate conturile” și căutați-o). Cu „Editează” modificați datele oricărui cont, setați o parolă nouă sau trimiteți linkul de alegere a parolei.": "Csapattag hozzáadása: a személy fiókot hoz létre az oldalon (vagy vásárlóként adjátok hozzá), majd itt kiosztjátok a szerepkört (válasszátok a „Minden fiók” lehetőséget, és keressétek meg). A „Szerkesztés” gombbal bármely fiók adatait módosíthatjátok, új jelszót állíthattok be vagy elküldhetitek a jelszóválasztó linket.",
+    "principală": "fő",
+    "Bifează toate categoriile în care se încadrează produsele. Prima categorie bifată apare pe cardul de pe site.": "Jelöld be az összes kategóriát, amelybe a termékek tartoznak. Az első bejelölt kategória jelenik meg a kártyán az oldalon.",
+    "Caută după nume, localitate sau județ": "Keresés név, település vagy megye szerint",
+    "Toate județele": "Minden megye"
 }

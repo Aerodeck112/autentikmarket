@@ -12,13 +12,13 @@
             <img src="{{ $producer->logoUrl() }}" alt="" loading="lazy" class="absolute bottom-3 left-3 size-14 rounded-full border-2 border-white bg-white object-cover shadow">
         @endif
         @if ($producer->category)
-            <span class="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-ink backdrop-blur">{{ $producer->category->icon }} {{ $producer->category->t('name') }}</span>
+            <span class="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-ink backdrop-blur">{{ $producer->category->icon }} {{ $producer->category->t('name') }}@if ($producer->relationLoaded('categories') && $producer->categories->count() > 1) <span class="text-ink-soft">+{{ $producer->categories->count() - 1 }}</span>@endif</span>
         @endif
     </div>
     <div class="mt-3 flex items-start justify-between gap-2">
         <div>
             <p class="font-display text-lg leading-tight text-ink group-hover:text-clay">{{ $producer->brand_name }}</p>
-            <p class="text-sm text-ink-soft">{{ $producer->city }}</p>
+            <p class="text-sm text-ink-soft">{{ $producer->locationLabel() }}</p>
         </div>
         @if (($producer->rating ?? null) > 0)
             <span class="shrink-0 text-sm font-semibold text-clay">★ {{ number_format($producer->rating, 1) }}</span>

@@ -37,7 +37,7 @@ class ProducerController extends Controller
         $filter = $request->input('filter', 'all');
         $q = trim((string) $request->input('q'));
 
-        return Producer::query()->with(['category', 'user'])
+        return Producer::query()->with(['category', 'categories', 'user'])
             ->withCount([
                 'registrations as participations_count' => fn ($r) => $r->where('status', RegistrationStatus::Approved->value),
                 'documents', 'contracts',
@@ -50,7 +50,7 @@ class ProducerController extends Controller
             ->when($filter === 'approved', fn ($x) => $x->where('status', ProducerStatus::Approved->value))
             ->when($filter === 'missing_docs', fn ($x) => $x->where(fn ($w) => $w->doesntHave('documents')->orWhereHas('documentRequests', fn ($d) => $d->whereNull('fulfilled_at'))))
             ->when($filter === 'new', fn ($x) => $x->whereIn('status', [ProducerStatus::New->value, ProducerStatus::Incomplete->value]))
-            ->when($request->input('category'), fn ($x, $c) => $x->where('producer_category_id', $c))
+            ->when($request->input('category'), fn ($x, $c) => $x->whereHas('categories', fn ($w) => $w->where('producer_categories.id', $c)))
             ->when($q, fn ($x) => $x->where(fn ($w) => $w->where('brand_name', 'like', "%{$q}%")->orWhere('legal_name', 'like', "%{$q}%")
                 ->orWhere('representative_name', 'like', "%{$q}%")->orWhere('cui', 'like', "%{$q}%")->orWhere('email', 'like', "%{$q}%")->orWhere('city', 'like', "%{$q}%")));
     }
@@ -80,7 +80,7 @@ class ProducerController extends Controller
     {
         $rows = $this->query($request)->orderBy('brand_name')->lazy(200)->map(fn (Producer $p) => [
             $p->brand_name, $p->legal_name, $p->cui, $p->representative_name, $p->phone, $p->email, $p->city, $p->county,
-            strtoupper($p->preferredLanguage()->value), $p->category?->name_ro, $p->status->value, $p->participations_count,
+            strtoupper($p->preferredLanguage()->value), $p->categories->pluck('name_ro')->implode(', ') ?: $p->category?->name_ro, $p->status->value, $p->participations_count,
             $p->last_participation, $p->contracts_count, $p->documents_count, $p->rating ? round($p->rating, 1) : '',
         ]);
 
@@ -92,7 +92,7 @@ class ProducerController extends Controller
 
     public function show(Producer $producer): View
     {
-        $producer->load(['category', 'user', 'documents.reviewer', 'documentRequests.requester', 'statusHistory.user', 'contracts', 'annexes.event', 'gallery']);
+        $producer->load(['category', 'categories', 'user', 'documents.reviewer', 'documentRequests.requester', 'statusHistory.user', 'contracts', 'annexes.event', 'gallery']);
 
         return view('crm.producers.show', [
             'producer' => $producer,
@@ -125,6 +125,8 @@ class ProducerController extends Controller
             // Admin poate modifica manual limba producătorului.
             'preferred_language' => ['required', Rule::enum(Language::class)],
             'producer_category_id' => ['nullable', 'exists:producer_categories,id'],
+            'category_ids' => ['nullable', 'array', 'max:20'],
+            'category_ids.*' => ['integer', 'exists:producer_categories,id'],
             'description_ro' => ['nullable', 'string', 'max:3000'],
             'description_hu' => ['nullable', 'string', 'max:3000'],
             'story_ro' => ['nullable', 'string', 'max:6000'],
@@ -157,11 +159,14 @@ class ProducerController extends Controller
         }
 
         $producer = DB::transaction(function () use ($data, $request, $email) {
-            $fields = collect($data)->except(['create_account', 'contact_first_name', 'contact_last_name', 'approve'])->all();
+            $fields = collect($data)->except(['create_account', 'contact_first_name', 'contact_last_name', 'approve', 'category_ids'])->all();
             $producer = new Producer($fields);
             $producer->email = $email;
             $producer->is_public = $request->boolean('is_public');
             $producer->save();
+            if ($request->boolean('categories_form')) {
+                $producer->syncCategories($request->input('category_ids', []));
+            }
 
             return $producer;
         });
@@ -312,13 +317,16 @@ class ProducerController extends Controller
     public function update(Request $request, Producer $producer, InvitationService $invitations): RedirectResponse
     {
         $data = $request->validate(array_merge($this->rules(), self::accountRules()));
-        $data = collect($data)->except(array_keys(self::accountRules()))->all();
+        $data = collect($data)->except([...array_keys(self::accountRules()), 'category_ids'])->all();
         $data['is_public'] = $request->boolean('is_public');
         $old = $producer->only(['preferred_language', 'brand_name', 'shop_url']);
         if ($data['brand_name'] !== $producer->brand_name) {
             $data['slug'] = Producer::uniqueSlug($data['brand_name'], $producer->id);
         }
         $producer->update($data);
+        if ($request->boolean('categories_form')) {
+            $producer->syncCategories($request->input('category_ids', []));
+        }
         AuditLogger::log('producer.updated', $producer, $old, $producer->only(['preferred_language', 'brand_name', 'shop_url']));
 
         $message = __('Producătorul a fost actualizat.');

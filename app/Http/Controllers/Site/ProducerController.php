@@ -15,11 +15,13 @@ class ProducerController extends Controller
     {
         $category = $request->string('category')->toString();
         $q = trim($request->string('q')->toString());
+        $county = trim($request->string('county')->toString());
 
-        $producers = Producer::publicListing()->with('category')
+        $producers = Producer::publicListing()->with(['category', 'categories'])
             ->withAvg('approvedReviews as rating', 'rating')
-            ->when($category, fn ($query) => $query->whereHas('category', fn ($c) => $c->where('slug', $category)))
-            ->when($q, fn ($query) => $query->where(fn ($w) => $w->where('brand_name', 'like', "%{$q}%")->orWhere('city', 'like', "%{$q}%")))
+            ->when($category, fn ($query) => $query->whereHas('categories', fn ($c) => $c->where('slug', $category)))
+            ->when($county, fn ($query) => $query->where('county', $county))
+            ->when($q, fn ($query) => $query->where(fn ($w) => $w->where('brand_name', 'like', "%{$q}%")->orWhere('city', 'like', "%{$q}%")->orWhere('county', 'like', "%{$q}%")))
             ->orderBy('brand_name')
             ->paginate(24)->withQueryString();
 
@@ -28,6 +30,8 @@ class ProducerController extends Controller
             'categories' => ProducerCategory::where('active', true)->orderBy('sort_order')->get(),
             'category' => $category,
             'q' => $q,
+            'county' => $county,
+            'counties' => Producer::publicListing()->whereNotNull('county')->where('county', '!=', '')->distinct()->orderBy('county')->pluck('county'),
         ]);
     }
 
@@ -35,7 +39,7 @@ class ProducerController extends Controller
     {
         abort_unless($producer->isApproved() && $producer->is_public, 404);
 
-        $producer->load(['category', 'gallery']);
+        $producer->load(['category', 'categories', 'gallery']);
         $reviews = $producer->approvedReviews()->with('user')->latest('moderated_at')->limit(12)->get();
         $events = $producer->registrations()->where('status', RegistrationStatus::Approved->value)
             ->with('event')->get()->pluck('event')->filter()->sortByDesc('event_date')->take(8);

@@ -11,7 +11,7 @@
                 <h2 class="text-xl">{{ __('Brand și prezentare') }}</h2>
                 <div class="mt-4 grid gap-4 sm:grid-cols-2">
                     <x-input name="brand_name" :label="__('Denumire brand')" :value="$producer->brand_name" required />
-                    <x-select name="producer_category_id" :label="__('Categorie')" :options="$categories->mapWithKeys(fn ($c) => [$c->id => $c->icon.' '.$c->t('name')])->all()" :value="$producer->producer_category_id" :placeholder="__('Alege categoria')" />
+                    <x-category-checkboxes :categories="$categories" :selected="$producer->categories->pluck('id')->all()" :primary="$producer->producer_category_id" class="sm:col-span-2" />
                     <x-textarea name="description_ro" :label="__('Descriere scurtă (RO)')" :value="$producer->description_ro" rows="3" class="sm:col-span-2" />
                     <x-textarea name="description_hu" :label="__('Descriere scurtă (HU)')" :value="$producer->description_hu" rows="3" class="sm:col-span-2" />
                     <x-textarea name="story_ro" :label="__('Povestea ta (RO)')" :value="$producer->story_ro" rows="5" />

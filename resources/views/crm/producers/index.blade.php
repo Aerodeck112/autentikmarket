@@ -31,7 +31,7 @@
                     <td class="text-xs">{{ $p->phone }}<br><span class="text-ink-soft">{{ $p->email }}</span></td>
                     <td class="text-sm">{{ $p->city }}</td>
                     <td><x-lang-badge :lang="$p->preferred_language" /></td>
-                    <td class="text-sm">{{ $p->category?->name_ro }}</td>
+                    <td class="text-sm">{{ $p->categories->pluck('name_ro')->implode(', ') ?: $p->category?->name_ro }}</td>
                     <td><x-status :status="$p->status" /></td>
                     <td class="text-right">{{ $p->participations_count }}</td>
                     <td class="whitespace-nowrap text-xs">{{ $p->last_participation ? \Illuminate\Support\Carbon::parse($p->last_participation)->format('d.m.Y') : '—' }}</td>

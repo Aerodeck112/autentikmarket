@@ -15,9 +15,13 @@
                     @endif
                 </div>
                 <div class="flex-1 pb-2">
-                    @if ($producer->category)<p class="eyebrow">{{ $producer->category->icon }} {{ $producer->category->t('name') }}</p>@endif
+                    @if ($producer->categories->isNotEmpty())
+                        <p class="eyebrow">{{ $producer->categories->map(fn ($c) => trim($c->icon.' '.$c->t('name')))->implode(' · ') }}</p>
+                    @elseif ($producer->category)
+                        <p class="eyebrow">{{ $producer->category->icon }} {{ $producer->category->t('name') }}</p>
+                    @endif
                     <h1 class="mt-2 text-4xl sm:text-5xl">{{ $producer->brand_name }}</h1>
-                    <p class="mt-2 text-ink-soft">{{ $producer->city }}@if ($producer->county), {{ $producer->county }}@endif
+                    <p class="mt-2 text-ink-soft">@if ($producer->locationLabel())📍 {{ $producer->locationLabel() }}@endif
                         @if ($reviewsCount) · <span class="font-semibold text-clay">★ {{ $rating }}</span> ({{ $reviewsCount }} {{ __('recenzii') }})@endif
                     </p>
                 </div>

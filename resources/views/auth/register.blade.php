@@ -37,7 +37,12 @@
                     <x-input name="last_name" :label="__('Nume')" autocomplete="family-name" required />
                     <x-input name="email" type="email" :label="__('E-mail')" autocomplete="email" required />
                     <x-input name="phone" type="tel" :label="__('Telefon')" autocomplete="tel" />
-                    <x-input name="city" :label="__('Localitate')" autocomplete="address-level2" class="sm:col-span-2" />
+                    @if ($producer)
+                        <x-input name="city" :label="__('Localitate')" autocomplete="address-level2" />
+                        <x-input name="county" :label="__('Județ')" autocomplete="address-level1" />
+                    @else
+                        <x-input name="city" :label="__('Localitate')" autocomplete="address-level2" class="sm:col-span-2" />
+                    @endif
                     <x-input name="password" type="password" :label="__('Parolă')" autocomplete="new-password" :help="__('Minim 8 caractere, litere și cifre.')" required />
                     <x-input name="password_confirmation" type="password" :label="__('Confirmă parola')" autocomplete="new-password" required />
                 </div>

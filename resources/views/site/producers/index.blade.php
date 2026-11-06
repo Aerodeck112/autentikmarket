@@ -5,15 +5,21 @@
         <p class="mt-4 max-w-2xl text-lg text-ink-soft">{{ __('Fiecare producător de pe această pagină a fost verificat de echipa Autentik Market. Oameni reali, cu povești reale.') }}</p>
 
         <form method="GET" class="mt-8 flex flex-col gap-4">
-            <div class="flex max-w-md gap-2">
-                <input type="search" name="q" value="{{ $q }}" placeholder="{{ __('Caută după nume sau localitate') }}" class="field-input !rounded-full">
+            <div class="flex max-w-2xl flex-wrap gap-2">
+                <input type="search" name="q" value="{{ $q }}" placeholder="{{ __('Caută după nume, localitate sau județ') }}" class="field-input !rounded-full">
                 @if ($category)<input type="hidden" name="category" value="{{ $category }}">@endif
+                @if ($counties->isNotEmpty())
+                    <select name="county" onchange="this.form.submit()" class="field-input !w-auto !rounded-full" aria-label="{{ __('Județ') }}">
+                        <option value="">{{ __('Toate județele') }}</option>
+                        @foreach ($counties as $c)<option value="{{ $c }}" @selected($county === $c)>{{ $c }}</option>@endforeach
+                    </select>
+                @endif
                 <button class="btn-primary">{{ __('Caută') }}</button>
             </div>
             <div class="flex flex-wrap gap-2">
-                <a href="{{ lroute('producers.index', array_filter(['q' => $q])) }}" @class(['chip', 'chip-active' => ! $category])>{{ __('Toate') }}</a>
+                <a href="{{ lroute('producers.index', array_filter(['q' => $q, 'county' => $county])) }}" @class(['chip', 'chip-active' => ! $category])>{{ __('Toate') }}</a>
                 @foreach ($categories as $cat)
-                    <a href="{{ lroute('producers.index', array_filter(['category' => $cat->slug, 'q' => $q])) }}" @class(['chip', 'chip-active' => $category === $cat->slug])>{{ $cat->icon }} {{ $cat->t('name') }}</a>
+                    <a href="{{ lroute('producers.index', array_filter(['category' => $cat->slug, 'q' => $q, 'county' => $county])) }}" @class(['chip', 'chip-active' => $category === $cat->slug])>{{ $cat->icon }} {{ $cat->t('name') }}</a>
                 @endforeach
             </div>
         </form>
