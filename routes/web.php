@@ -371,3 +371,6 @@ Route::middleware(['auth', 'can:crm.access'])->prefix('crm')->name('crm.')->grou
         Route::post('/{update}/rollback', [Crm\UpdateController::class, 'rollback'])->name('rollback');
     });
 });
+
+// Adrese /hu/... scrise cu cuvinte românești (și invers) → pagina corectă, nu 404.
+Route::fallback([Site\LocaleRedirectController::class, 'fallback']);

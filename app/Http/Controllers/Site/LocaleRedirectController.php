@@ -7,6 +7,8 @@ use App\Support\Locales;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Route;
+use Throwable;
 
 class LocaleRedirectController extends Controller
 {
@@ -14,6 +16,28 @@ class LocaleRedirectController extends Controller
     public function __invoke(Request $request): RedirectResponse
     {
         return redirect()->route(Locales::detect($request).'.home');
+    }
+
+    /**
+     * 404 sub /ro sau /hu: adresa scrisă cu cuvintele celeilalte limbi (ex. /hu/producatori/x)
+     * → pagina corectă (/hu/termelok/x). Altfel rămâne 404.
+     */
+    public function fallback(Request $request): RedirectResponse
+    {
+        $path = '/'.ltrim($request->path(), '/');
+        if (preg_match('#^/(ro|hu)(/.*)?$#', $path, $m)) {
+            $target = $m[1];
+            $swapped = '/'.Locales::other($target).($m[2] ?? '');
+            try {
+                $route = Route::getRoutes()->match(Request::create($swapped, 'GET'));
+            } catch (Throwable) {
+                $route = null;
+            }
+            if ($route && preg_match('/^(ro|hu)\.(.+)$/', (string) $route->getName(), $n) && Route::has($target.'.'.$n[2])) {
+                return redirect()->route($target.'.'.$n[2], $route->parameters(), 301);
+            }
+        }
+        abort(404);
     }
 
     /** Comutator de limbă pentru zonele fără prefix (cont, producător, staff, CRM). */

@@ -57,7 +57,13 @@ class Locales
         if ($name && preg_match('/^(ro|hu)\.(.+)$/', $name, $m)) {
             $params = $route->parameters();
             // Parametri localizați (ex. slug articol blog) se transformă prin resolver-ul rutei.
-            $params = LocalizedRouteParameters::translate($m[2], $params, $target);
+            $fields = [];
+            foreach (array_keys($params) as $key) {
+                if ($field = $route->bindingFieldFor($key)) {
+                    $fields[$key] = $field;
+                }
+            }
+            $params = LocalizedRouteParameters::translate($m[2], $params, $target, $fields);
             $targetName = $target.'.'.$m[2];
             if (Route::has($targetName)) {
                 return route($targetName, $params);

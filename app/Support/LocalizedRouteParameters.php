@@ -10,11 +10,14 @@ use Illuminate\Database\Eloquent\Model;
  */
 class LocalizedRouteParameters
 {
-    public static function translate(string $routeName, array $params, string $target): array
+    /** @param  array<string, string>  $bindingFields  câmpul de binding al fiecărui parametru (ex. {producer:slug} → slug) */
+    public static function translate(string $routeName, array $params, string $target, array $bindingFields = []): array
     {
         foreach ($params as $key => $value) {
             if ($value instanceof Model) {
-                $params[$key] = $value->getRouteKey();
+                // {producer:slug} → slug-ul, nu id-ul (altfel /hu/termelok/1 → 404)
+                $field = $bindingFields[$key] ?? null;
+                $params[$key] = $field ? $value->getAttribute($field) : $value->getRouteKey();
             }
         }
 
